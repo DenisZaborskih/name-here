@@ -1,10 +1,24 @@
-<div class="start-container">
-  <div class="container-header">
-    <img src="" alt="Тут Название Лого" class="start-container__logo" />
-    <h2 class="start-container__name">Тут название</h2>
+<main class="main-container">
+  <div class="start-container">
+    <div class="container-header">
+      <img
+        src="assets/logo.png"
+        alt="Тут Название Лого"
+        class="start-container__logo"
+      />
+      <h2 class="start-container__name">
+        <span class="start-container__name_red">ТУТ</span>
+        <span class="start-container__name_green">НАЗВАНИЕ</span>
+      </h2>
+    </div>
+    <div class="start-container__categories-area">
+      <a
+        href="#"
+        class="start-container__category"
+        *ngFor="let category of categories"
+        >КАТЕГОРИЯ {{ category }}</a
+      >
+    </div>
+    <button class="start-container__button">НАЧАТЬ ПОИСК</button>
   </div>
-  <div class="start-container__categories-area">
-    
-  </div>
-  <button class="start-container__button">Начать поиск собеседника</button>
-</div>
+</main>
