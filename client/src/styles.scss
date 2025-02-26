@@ -12,10 +12,20 @@ html{
 
 body{
     margin: 0;
-    background-image: url('../public/assets/Background.png');
+    background-image: url('/assets/Background.png');
     font-size: 48px;
     font-family: "Viaoda Libre", serif;
     font-weight: 400;
+    &::-webkit-scrollbar{
+        width: 8px;
+    }
+    &::-webkit-scrollbar-track{
+        background: #0c8b00;
+    }
+    &::-webkit-scrollbar-thumb{
+        background-color: lime;
+        border-radius: 20px;
+    }
 }
 
 button{
