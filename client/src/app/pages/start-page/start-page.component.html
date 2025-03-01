@@ -4,11 +4,11 @@
       <img
         src="assets/logo.svg"
         alt="Тут Название Лого"
-        class="start-container__logo"
+        class="container-header__logo"
       />
-      <h2 class="start-container__name">
-        <span class="start-container__name_red">ТУТ</span>
-        <span class="start-container__name_green">НАЗВАНИЕ</span>
+      <h2 class="container-header__name">
+        <span class="container-header__name_red">ТУТ</span>
+        <span class="container-header__name_green">НАЗВАНИЕ</span>
       </h2>
     </div>
     <div class="start-container__categories-area">
@@ -19,6 +19,12 @@
         >КАТЕГОРИЯ {{ category }}</a
       >
     </div>
-    <button class="start-container__button">НАЧАТЬ ПОИСК</button>
+    <button
+      class="start-container__button"
+      [routerLink]="['/chat']"
+      routerLinkActive="router-link-active"
+    >
+      НАЧАТЬ ПОИСК
+    </button>
   </div>
 </main>
