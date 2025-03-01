@@ -1,10 +1,12 @@
 .main-container {
   background-image: url("../../../../public/assets/bg-tile-chat.png");
+  margin: 0 30px 20px;
+  text-shadow: rgba($color: #000000, $alpha: 0.2) 0 4px 4px;
 }
 
 .container-header {
   display: flex;
-  margin: 55px 20px 16px 20px;
+  padding: 71px 62px 0 82px;
   gap: 50px;
   &__logo {
     height: 148px;
@@ -34,18 +36,34 @@
     display: flex;
     flex-direction: row;
     &__window{
-        flex-grow: 2;
-        width: 960px;
-        height: 930px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-grow: 1;
+        max-width: 960px;
+        max-height: 930px;
+        background-image: url("../../../../public/assets/bg-tile-dialogue.png");
+        margin: 71px 68px 39px 0;
+        &_search{
+            color: lime;
+        }
     }
 }
 
 .chat-navigation {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  gap: 57px;
+  margin-bottom: 32px;
+  flex-grow: 0;
   &__button {
     background-color: lime;
     color: red;
     font-size: 48px;
+    text-shadow: rgba($color: #000000, $alpha: 0.2) 0 4px 4px;
+    border-radius: 50px;
+    min-width: 592px;
+    min-height: 81px;
   }
 }

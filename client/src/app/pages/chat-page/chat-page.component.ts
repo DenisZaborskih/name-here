@@ -1,12 +1,20 @@
-import { Component } from '@angular/core';
+  import { CommonModule } from '@angular/common';
+  import { Component } from '@angular/core';
 
-@Component({
-  selector: 'app-chat-page',
-  standalone: true,
-  imports: [],
-  templateUrl: './chat-page.component.html',
-  styleUrl: './chat-page.component.scss'
-})
-export class ChatPageComponent {
+  enum State {
+    Active,
+    Search,
+    Banned
+  }
 
-}
+  @Component({
+    selector: 'app-chat-page',
+    standalone: true,
+    imports: [CommonModule],
+    templateUrl: './chat-page.component.html',
+    styleUrl: './chat-page.component.scss'
+  })
+  export class ChatPageComponent {
+    public State = State;
+    public state: State = State.Search;
+  }

@@ -16,6 +16,22 @@
       <button class="chat-navigation__button">ВЕРНУТЬСЯ К ПОИСКУ</button>
       <button class="chat-navigation__button">ПОКИНУТЬ ЧАТ</button>
     </div>
-    <div class="chat-container__window"></div>
+    <div class="chat-container__window">
+      <div [ngSwitch]="state">
+        <div *ngSwitchCase="State.Search" class="chat-container__window_search">
+          ОЖИДАНИЕ ЧАТА
+        </div>
+        <div
+          *ngSwitchCase="State.Active"
+          class="chat-container__window_dialogue"
+        >
+          тут должен быть чат
+        </div>
+        <div *ngSwitchCase="State.Banned" class="chat-container__window_banned">
+          ВЫ БЫЛИ ЗАБАНЕНЫ
+        </div>
+        <div *ngSwitchDefault>КАК ТЫ ТУТ ОКАЗАЛСЯ?</div>
+      </div>
+    </div>
   </div>
 </main>
