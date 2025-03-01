@@ -1,0 +1,51 @@
+.main-container {
+  background-image: url("../../../../public/assets/bg-tile-chat.png");
+}
+
+.container-header {
+  display: flex;
+  margin: 55px 20px 16px 20px;
+  gap: 50px;
+  &__logo {
+    height: 148px;
+  }
+  &__name {
+    margin: 0;
+    background-image: url("../../../../public/assets/bg-title.png");
+    background-size: cover;
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    &_red {
+      color: red;
+      line-height: 1;
+      margin: 4px auto 0px 32px;
+    }
+    &_green {
+      color: lime;
+      text-align: center;
+      margin: 0 64px 0 64px;
+      line-height: 1;
+    }
+  }
+}
+
+.chat-container{
+    display: flex;
+    flex-direction: row;
+    &__window{
+        flex-grow: 2;
+        width: 960px;
+        height: 930px;
+    }
+}
+
+.chat-navigation {
+  display: flex;
+  flex-direction: column;
+  &__button {
+    background-color: lime;
+    color: red;
+    font-size: 48px;
+  }
+}
