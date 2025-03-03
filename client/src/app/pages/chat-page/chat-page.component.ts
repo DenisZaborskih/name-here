@@ -1,5 +1,6 @@
   import { CommonModule } from '@angular/common';
   import { Component } from '@angular/core';
+import { RouterLink, RouterModule } from '@angular/router';
 
   enum State {
     Active,
@@ -10,11 +11,27 @@
   @Component({
     selector: 'app-chat-page',
     standalone: true,
-    imports: [CommonModule],
+    imports: [CommonModule, RouterModule, RouterLink],
     templateUrl: './chat-page.component.html',
     styleUrl: './chat-page.component.scss'
   })
   export class ChatPageComponent {
     public State = State;
-    public state: State = State.Search;
+    private state: State = State.Active;
+
+    getState(){
+      return this.state;
+    }
+
+    setState(current : State){
+      this.state = current;
+    }
+
+    sendMessage(){
+
+    }
+
+    addPhoto(){
+      return -1;
+    }
   }

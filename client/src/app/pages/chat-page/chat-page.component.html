@@ -13,11 +13,19 @@
         </h2>
       </div>
       <button class="chat-navigation__button">ОТПРАВИТЬ ЖАЛОБУ</button>
-      <button class="chat-navigation__button">ВЕРНУТЬСЯ К ПОИСКУ</button>
-      <button class="chat-navigation__button">ПОКИНУТЬ ЧАТ</button>
+      <button class="chat-navigation__button" (click)="setState(State.Search)">
+        ВЕРНУТЬСЯ К ПОИСКУ
+      </button>
+      <button
+        class="chat-navigation__button"
+        [routerLink]="['/start']"
+        routerLinkActive="router-link-active"
+      >
+        ПОКИНУТЬ ЧАТ
+      </button>
     </div>
     <div class="chat-container__window">
-      <div [ngSwitch]="state">
+      <div [ngSwitch]="getState()">
         <div *ngSwitchCase="State.Search" class="chat-container__window_search">
           ОЖИДАНИЕ ЧАТА
         </div>
@@ -25,7 +33,63 @@
           *ngSwitchCase="State.Active"
           class="chat-container__window_dialogue"
         >
-          тут должен быть чат
+          <div class="chat-container__message-area">
+            <p class="chat-container__message_my">АГА</p>
+            <p class="chat-container__message_interlocutor">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Veniam,
+              sit?
+            </p>
+            <p class="chat-container__message_my">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Temporibus, cum pariatur expedita quos, fuga assumenda quis
+              accusamus vero provident aliquam beatae a. Quas aspernatur, cum
+              inventore sit sint commodi eius labore placeat, repellendus,
+              repellat sequi dolores nobis perspiciatis deserunt accusantium
+              animi voluptatum a eaque sed deleniti corrupti! Reprehenderit, ad.
+              Quas voluptatem mollitia perferendis sunt, incidunt ipsam?
+              Delectus, itaque alias expedita error illo ipsum dolor deleniti
+              optio architecto minima. Incidunt velit ipsa placeat unde quas
+              necessitatibus, molestias cumque veniam qui perspiciatis veritatis
+              maxime dolor pariatur deleniti expedita quisquam? Eveniet, alias.
+              Quae nisi distinctio dolore at ipsa ratione non hic libero eos!
+            </p>
+            <p class="chat-container__message_my">Lorem.</p>
+            <p class="chat-container__message_interlocutor">
+              Далеко-далеко за словесными горами в стране, гласных и согласных
+              живут рыбные тексты. Вскоре несколько знаках взобравшись собрал
+              оксмокс? Заголовок знаках вершину вдали пор большого ipsum все
+              реторический залетают предупредила, текстами агентство большой рот
+              своих она если проектах от всех буквенных. Точках щеке жаренные
+              меня ее ipsum lorem, правилами буквоград парадигматическая мир
+              проектах несколько семантика заманивший? Заглавных, текста дороге?
+              От всех вскоре ее ручеек снова букв моей имени текста пояс
+              напоивший грустный последний ты маленький, за заманивший. Вскоре,
+              свою грамматики. Гор точках всеми ручеек текста.
+            </p>
+            <p class="chat-container__message_my">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Temporibus quo expedita modi consectetur qui nam.
+            </p>
+            <p class="chat-container__message_interlocutor">ДА!</p>
+            <p class="chat-container__message_interlocutor">ДА!</p>
+            <p class="chat-container__message_my">АГА</p>
+          </div>
+          <div class="message-type">
+            <textarea
+              name="message-write"
+              id="message-write"
+              class="message-type__message-write"
+              placeholder="Начните печатать"
+            ></textarea>
+            <button
+              class="message-type__image-button"
+              (click)="addPhoto()"
+            ></button>
+            <button
+              class="message-type__send-button"
+              (click)="sendMessage()"
+            ></button>
+          </div>
         </div>
         <div *ngSwitchCase="State.Banned" class="chat-container__window_banned">
           ВЫ БЫЛИ ЗАБАНЕНЫ
