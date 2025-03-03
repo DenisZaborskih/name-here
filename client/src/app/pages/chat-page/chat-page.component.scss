@@ -54,12 +54,12 @@
       width: 32px;
     }
     &::-webkit-scrollbar-track {
-      background: #0c8b00;
+      background: #6f7507;
       border-top-right-radius: 20px;
       border-bottom-right-radius: 20px;
     }
     &::-webkit-scrollbar-thumb {
-      background-color: lime;
+      background-color: #460101;
       border-radius: 20px;
     }
 
@@ -67,10 +67,13 @@
       height: 554px;
       width: 600px;
     }
-
+    &_for-search{
+      justify-content: center;
+      align-items: center;
+    }
     &_search {
+      align-self: center;
       color: lime;
-      margin: auto;
     }
   }
 
@@ -103,23 +106,10 @@
     color: red;
     text-align: left;
   }
-  &__image-button {
-    position: sticky;
-    bottom: 0;
-    right: 0;
-  }
-  &__send-button {
-    position: sticky;
-    bottom: 0;
-    right: 0;
-  }
 }
 
 .message-type {
   display: flex;
-  position: sticky;
-  bottom: 0;
-  margin-top: 32px;
   padding-right: 30px;
   background-color: rgba($color: #000000, $alpha: 0.6);
   border-radius: 20px;
@@ -151,15 +141,23 @@
       outline: none;
     }
   }
-  &__image-button{
+  &__image-button {
     background-image: url("../../../../public/assets/image-button.png");
     background-size: cover;
     width: 140px;
+    cursor: pointer;
   }
-  &__send-button{
+  &__send-button {
     background-image: url("../../../../public/assets/send-button.png");
     background-size: cover;
     width: 135px;
+    cursor: pointer;
+    &_disabled {
+      background-image: url("../../../../public/assets/no-button.png");
+      background-size: cover;
+      width: 135px;
+      cursor: crosshair;
+    }
   }
 }
 
@@ -179,5 +177,25 @@
     min-width: 592px;
     min-height: 81px;
     cursor: pointer;
+  }
+}
+
+.add-error {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  bottom: 0;
+  margin-top: 32px;
+}
+
+.add-photo-error {
+  background-color: rgba($color: #ff0000, $alpha: 0.6);
+  color: #0090ff;
+  position: sticky;
+  font-size: 30px;
+  width: 96%;
+  margin: 0 2% 0 2%;
+  &_disabled {
+    display: none;
   }
 }

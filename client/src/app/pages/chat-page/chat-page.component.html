@@ -12,7 +12,13 @@
           <span class="container-header__name_green">НАЗВАНИЕ</span>
         </h2>
       </div>
-      <button class="chat-navigation__button">ОТПРАВИТЬ ЖАЛОБУ</button>
+      <button
+        class="chat-navigation__button"
+        (click)="setState(State.Active)"
+        (click)="sendReport()"
+      >
+        ОТПРАВИТЬ ЖАЛОБУ
+      </button>
       <button class="chat-navigation__button" (click)="setState(State.Search)">
         ВЕРНУТЬСЯ К ПОИСКУ
       </button>
@@ -24,7 +30,10 @@
         ПОКИНУТЬ ЧАТ
       </button>
     </div>
-    <div class="chat-container__window">
+    <div
+      class="chat-container__window"
+      [class.chat-container__window_for-search]="getState() == State.Search"
+    >
       <div [ngSwitch]="getState()">
         <div *ngSwitchCase="State.Search" class="chat-container__window_search">
           ОЖИДАНИЕ ЧАТА
@@ -74,21 +83,31 @@
             <p class="chat-container__message_interlocutor">ДА!</p>
             <p class="chat-container__message_my">АГА</p>
           </div>
-          <div class="message-type">
-            <textarea
-              name="message-write"
-              id="message-write"
-              class="message-type__message-write"
-              placeholder="Начните печатать"
-            ></textarea>
-            <button
-              class="message-type__image-button"
-              (click)="addPhoto()"
-            ></button>
-            <button
-              class="message-type__send-button"
-              (click)="sendMessage()"
-            ></button>
+          <div class="add-error">
+            <p
+              class="add-photo-error"
+              [class.add-photo-error_disabled]="getCanAddPhoto()"
+            >
+              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ ???МБ
+            </p>
+            <div class="message-type">
+              <textarea
+                name="message-write"
+                id="message-write"
+                class="message-type__message-write"
+                placeholder="Начните печатать"
+              ></textarea>
+              <button
+                class="message-type__image-button"
+                (click)="addPhoto()"
+              ></button>
+              <button
+                class="message-type__send-button"
+                [class.message-type__send-button_disabled]="!getCanAddPhoto()"
+                [disabled]="!getCanAddPhoto()"
+                (click)="sendMessage()"
+              ></button>
+            </div>
           </div>
         </div>
         <div *ngSwitchCase="State.Banned" class="chat-container__window_banned">
