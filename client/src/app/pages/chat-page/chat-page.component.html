@@ -1,1 +1,120 @@
-<p>chat-page works!</p>
+<main class="main-container">
+  <div class="chat-container">
+    <div class="chat-navigation">
+      <div class="container-header">
+        <img
+          src="assets/logo.svg"
+          alt="Тут Название Лого"
+          class="container-header__logo"
+        />
+        <h2 class="container-header__name">
+          <span class="container-header__name_red">ТУТ</span>
+          <span class="container-header__name_green">НАЗВАНИЕ</span>
+        </h2>
+      </div>
+      <button
+        class="chat-navigation__button"
+        (click)="setState(State.Active)"
+        (click)="sendReport()"
+      >
+        ОТПРАВИТЬ ЖАЛОБУ
+      </button>
+      <button class="chat-navigation__button" (click)="setState(State.Search)">
+        ВЕРНУТЬСЯ К ПОИСКУ
+      </button>
+      <button
+        class="chat-navigation__button"
+        [routerLink]="['/start']"
+        routerLinkActive="router-link-active"
+      >
+        ПОКИНУТЬ ЧАТ
+      </button>
+    </div>
+    <div
+      class="chat-container__window"
+      [class.chat-container__window_for-search]="getState() == State.Search"
+    >
+      <div [ngSwitch]="getState()">
+        <div *ngSwitchCase="State.Search" class="chat-container__window_search">
+          ОЖИДАНИЕ ЧАТА
+        </div>
+        <div
+          *ngSwitchCase="State.Active"
+          class="chat-container__window_dialogue"
+        >
+          <div class="chat-container__message-area">
+            <p class="chat-container__message_my">АГА</p>
+            <p class="chat-container__message_interlocutor">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Veniam,
+              sit?
+            </p>
+            <p class="chat-container__message_my">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Temporibus, cum pariatur expedita quos, fuga assumenda quis
+              accusamus vero provident aliquam beatae a. Quas aspernatur, cum
+              inventore sit sint commodi eius labore placeat, repellendus,
+              repellat sequi dolores nobis perspiciatis deserunt accusantium
+              animi voluptatum a eaque sed deleniti corrupti! Reprehenderit, ad.
+              Quas voluptatem mollitia perferendis sunt, incidunt ipsam?
+              Delectus, itaque alias expedita error illo ipsum dolor deleniti
+              optio architecto minima. Incidunt velit ipsa placeat unde quas
+              necessitatibus, molestias cumque veniam qui perspiciatis veritatis
+              maxime dolor pariatur deleniti expedita quisquam? Eveniet, alias.
+              Quae nisi distinctio dolore at ipsa ratione non hic libero eos!
+            </p>
+            <p class="chat-container__message_my">Lorem.</p>
+            <p class="chat-container__message_interlocutor">
+              Далеко-далеко за словесными горами в стране, гласных и согласных
+              живут рыбные тексты. Вскоре несколько знаках взобравшись собрал
+              оксмокс? Заголовок знаках вершину вдали пор большого ipsum все
+              реторический залетают предупредила, текстами агентство большой рот
+              своих она если проектах от всех буквенных. Точках щеке жаренные
+              меня ее ipsum lorem, правилами буквоград парадигматическая мир
+              проектах несколько семантика заманивший? Заглавных, текста дороге?
+              От всех вскоре ее ручеек снова букв моей имени текста пояс
+              напоивший грустный последний ты маленький, за заманивший. Вскоре,
+              свою грамматики. Гор точках всеми ручеек текста.
+            </p>
+            <p class="chat-container__message_my">
+              Lorem ipsum dolor sit amet consectetur adipisicing elit.
+              Temporibus quo expedita modi consectetur qui nam.
+            </p>
+            <p class="chat-container__message_interlocutor">ДА!</p>
+            <p class="chat-container__message_interlocutor">ДА!</p>
+            <p class="chat-container__message_my">АГА</p>
+          </div>
+          <div class="add-error">
+            <p
+              class="add-photo-error"
+              [class.add-photo-error_disabled]="getCanAddPhoto()"
+            >
+              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ ???МБ
+            </p>
+            <div class="message-type">
+              <textarea
+                name="message-write"
+                id="message-write"
+                class="message-type__message-write"
+                placeholder="Начните печатать"
+              ></textarea>
+              <button
+                class="message-type__image-button"
+                (click)="addPhoto()"
+              ></button>
+              <button
+                class="message-type__send-button"
+                [class.message-type__send-button_disabled]="!getCanAddPhoto()"
+                [disabled]="!getCanAddPhoto()"
+                (click)="sendMessage()"
+              ></button>
+            </div>
+          </div>
+        </div>
+        <div *ngSwitchCase="State.Banned" class="chat-container__window_banned">
+          ВЫ БЫЛИ ЗАБАНЕНЫ
+        </div>
+        <div *ngSwitchDefault>КАК ТЫ ТУТ ОКАЗАЛСЯ?</div>
+      </div>
+    </div>
+  </div>
+</main>

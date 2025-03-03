@@ -1,0 +1,201 @@
+.main-container {
+  background-image: url("../../../../public/assets/bg-tile-chat.png");
+  margin: 0 30px 20px;
+  text-shadow: rgba($color: #000000, $alpha: 0.2) 0 4px 4px;
+}
+
+.container-header {
+  display: flex;
+  padding: 71px 62px 0 82px;
+  gap: 50px;
+  &__logo {
+    height: 148px;
+  }
+  &__name {
+    margin: 0;
+    background-image: url("../../../../public/assets/bg-title.png");
+    background-size: cover;
+    font-weight: 400;
+    display: flex;
+    flex-direction: column;
+    &_red {
+      color: red;
+      line-height: 1;
+      margin: 4px auto 0px 32px;
+    }
+    &_green {
+      color: lime;
+      text-align: center;
+      margin: 0 64px 0 64px;
+      line-height: 1;
+    }
+  }
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  &__window {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 960px;
+    height: 930px;
+    background-image: url("../../../../public/assets/bg-tile-dialogue.png");
+    margin: 71px 68px 39px 0;
+    padding: 37px 25px 25px 10px;
+    border-radius: 20px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    position: relative;
+
+    &::-webkit-scrollbar {
+      width: 32px;
+    }
+    &::-webkit-scrollbar-track {
+      background: #6f7507;
+      border-top-right-radius: 20px;
+      border-bottom-right-radius: 20px;
+    }
+    &::-webkit-scrollbar-thumb {
+      background-color: #460101;
+      border-radius: 20px;
+    }
+
+    @media (max-height: 960px) {
+      height: 554px;
+      width: 600px;
+    }
+    &_for-search{
+      justify-content: center;
+      align-items: center;
+    }
+    &_search {
+      align-self: center;
+      color: lime;
+    }
+  }
+
+  &__message-area {
+    overflow-y: visible;
+    gap: 24px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+
+  &__message_my,
+  &__message_interlocutor {
+    background-color: rgba($color: #000000, $alpha: 0.6);
+    margin: 0;
+    width: 92%;
+    word-break: break-word;
+    padding: 16px;
+    border-radius: 20px;
+    font-size: 30px;
+    line-height: 42px;
+  }
+
+  &__message_my {
+    color: lime;
+    text-align: right;
+  }
+
+  &__message_interlocutor {
+    color: red;
+    text-align: left;
+  }
+}
+
+.message-type {
+  display: flex;
+  padding-right: 30px;
+  background-color: rgba($color: #000000, $alpha: 0.6);
+  border-radius: 20px;
+  &__message-write {
+    background: transparent;
+    margin: 0;
+    width: 60%;
+    height: 53px;
+    word-break: break-word;
+    padding: 16px;
+    font-size: 30px;
+    line-height: 42px;
+    resize: none;
+    border: none;
+    color: lime;
+    overflow: auto;
+    &::-webkit-scrollbar {
+      width: 0px;
+    }
+    margin-top: auto;
+    font-family: "Viaoda Libre", serif;
+    font-weight: 400;
+    @media (max-height: 960px) {
+      width: 31vw;
+    }
+    &:focus {
+      border-top-left-radius: 20px;
+      border-bottom-left-radius: 20px;
+      outline: none;
+    }
+  }
+  &__image-button {
+    background-image: url("../../../../public/assets/image-button.png");
+    background-size: cover;
+    width: 140px;
+    cursor: pointer;
+  }
+  &__send-button {
+    background-image: url("../../../../public/assets/send-button.png");
+    background-size: cover;
+    width: 135px;
+    cursor: pointer;
+    &_disabled {
+      background-image: url("../../../../public/assets/no-button.png");
+      background-size: cover;
+      width: 135px;
+      cursor: crosshair;
+    }
+  }
+}
+
+.chat-navigation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 57px;
+  margin-bottom: 32px;
+  flex-grow: 0;
+  &__button {
+    background-color: lime;
+    color: red;
+    font-size: 48px;
+    text-shadow: rgba($color: #000000, $alpha: 0.2) 0 4px 4px;
+    border-radius: 50px;
+    min-width: 592px;
+    min-height: 81px;
+    cursor: pointer;
+  }
+}
+
+.add-error {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  bottom: 0;
+  margin-top: 32px;
+}
+
+.add-photo-error {
+  background-color: rgba($color: #ff0000, $alpha: 0.6);
+  color: #0090ff;
+  position: sticky;
+  font-size: 30px;
+  width: 96%;
+  margin: 0 2% 0 2%;
+  &_disabled {
+    display: none;
+  }
+}
