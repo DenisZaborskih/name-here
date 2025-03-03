@@ -12,11 +12,12 @@
       </h2>
     </div>
     <div class="start-container__categories-area">
-      <a
-        href="#"
-        class="start-container__category active"
+      <button
+        class="start-container__category"
+        (click)="toggleCategory(category)"
+        [class.active]="isSelected(category)"
         *ngFor="let category of categories"
-        >КАТЕГОРИЯ {{ category }}</a
+        >{{ category.toUpperCase() }}</button
       >
     </div>
     <button
