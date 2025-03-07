@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from redis.asyncio import Redis
 
+from chat_service.src.api.v1 import websocket
 from chat_service.src.core.config import get_global_settings, get_redis_settings
 from chat_service.src.db import redis
 
@@ -22,3 +23,5 @@ app = FastAPI(
     openapi_url='/api/openapi.json',
     lifespan=lifespan
 )
+
+app.include_router(websocket.router, prefix='/api/v1/chat', tags=['chat'])

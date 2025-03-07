@@ -22,6 +22,7 @@ class CommonSettings(BaseSettings):
 
 class GlobalSettings(CommonSettings):
     project_name: str = Field(alias='PROJECT_NAME', default='chat')
+    debug: bool = Field(alias='DEBUG', default=False)
 
 
 class RedisSettings(CommonSettings):
