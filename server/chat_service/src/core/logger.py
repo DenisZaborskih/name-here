@@ -1,7 +1,7 @@
 import logging.config
 
-LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-LOG_DEFAULT_HANDLERS = ['console', ]
+LOG_FORMAT = '%(levelname)s:     %(message)s | %(asctime)s | %(name)s'
+LOG_DEFAULT_HANDLERS = ['console', 'file_handler']
 
 LOGGING = {
     'version': 1,
@@ -36,6 +36,12 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'stream': 'ext://sys.stdout',
         },
+        'file_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'app.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         '': {
@@ -50,11 +56,6 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-    },
-    'root': {
-        'level': 'INFO',
-        'formatter': 'verbose',
-        'handlers': LOG_DEFAULT_HANDLERS,
     },
 }
 
