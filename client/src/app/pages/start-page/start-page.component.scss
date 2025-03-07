@@ -41,11 +41,15 @@
     }
   }
   &__category {
+    background: transparent;
+    border: none;
     margin: 32px 70px 25px 10px;
     padding-left: 30px;
     text-decoration: none;
     text-align: left;
     color: red;
+    cursor: pointer;
+    font-size: 48px;
   }
   .active {
     background-color: lime;

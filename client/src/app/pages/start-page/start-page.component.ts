@@ -10,5 +10,30 @@ import { Router, RouterLink, RouterModule } from '@angular/router';
   styleUrl: './start-page.component.scss'
 })
 export class StartPageComponent {
-  public categories : number[] = [1,2,3,4,5,6,7,8,9,10];
+  categories = [
+    "Россия",
+    "Германия",
+    "Китай",
+    "США",
+    "Бразилия",
+    "Индия",
+    "Япония",
+    "Франция",
+    "Италия",
+    "Канада",
+    "Мексика",
+    "Испания",
+    "Австралия",
+    "Южная Корея",
+    "Египет"
+];
+  private selectedCategory: string | null = null;
+
+  toggleCategory(category: string) {
+    this.selectedCategory = this.selectedCategory === category ? null : category;
+  }
+
+  isSelected(category: string): boolean {
+    return this.selectedCategory === category;
+  }
 }
