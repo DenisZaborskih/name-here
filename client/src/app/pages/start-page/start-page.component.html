@@ -22,8 +22,7 @@
     </div>
     <button
       class="start-container__button"
-      [routerLink]="['/chat']"
-      routerLinkActive="router-link-active"
+      (click)="goToChat()"
     >
       НАЧАТЬ ПОИСК
     </button>
