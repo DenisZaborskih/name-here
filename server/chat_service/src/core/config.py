@@ -5,7 +5,7 @@ from logging import config as logging_config
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict, BaseSettings
 
-from chat_service.src.core.logger import LOGGING
+from chat_service.src.core.logger import LOGGING, setup_logging
 
 logging_config.dictConfig(LOGGING)
 
@@ -46,3 +46,12 @@ def get_redis_settings() -> RedisSettings:
 @lru_cache()
 def get_global_settings() -> GlobalSettings:
     return GlobalSettings()
+
+
+def init_logging():
+    setup_logging(debug=settings.debug)
+
+
+settings = get_global_settings()
+
+init_logging()

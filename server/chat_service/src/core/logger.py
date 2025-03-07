@@ -22,7 +22,7 @@ LOGGING = {
     },
     'handlers': {
         'console': {
-            'level': 'DEBUG',
+            'level': 'WARNING',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
@@ -39,14 +39,20 @@ LOGGING = {
         'file_handler': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': 'app.log',
+            'filename': 'logs/app.log',
+            'formatter': 'verbose',
+        },
+        'chat_file_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/chat.log',
             'formatter': 'verbose',
         },
     },
     'loggers': {
         '': {
             'handlers': LOG_DEFAULT_HANDLERS,
-            'level': 'INFO',
+            'level': 'DEBUG',
         },
         'uvicorn.error': {
             'level': 'INFO',
@@ -56,8 +62,21 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'chat_service.src.services.chat': {
+            'handlers': ['console', 'chat_file_handler'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'chat_service.src.api.v1.chat': {
+            'handlers': ['console', 'chat_file_handler'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
 
-logging.config.dictConfig(LOGGING)
-logger = logging.getLogger('')
+
+def setup_logging(debug=False):
+    if debug:
+        LOGGING['handlers']['console']['level'] = 'INFO'
+    logging.config.dictConfig(LOGGING)

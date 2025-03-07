@@ -8,6 +8,7 @@ class Message(BaseModel):
 
 class ErrorMessages:
     ROOM_NOT_FOUND = Message(status=1104, detail='Room not found')
+    INVALID_FILE_FORMAT = Message(status=1105, detail='Invalid file format')
 
 
 class Messages:

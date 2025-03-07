@@ -1,13 +1,14 @@
 import uuid
-from http import HTTPStatus
+import imghdr
 import logging
+from http import HTTPStatus
 
 from fastapi import WebSocket, HTTPException
 
 from chat_service.src.utils.messages import ErrorMessages, Messages
 
 
-logging.basicConfig(filename='Chat.log', level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -20,7 +21,7 @@ class ChatService:
     @staticmethod
     async def connect(user_ip: str, websocket: WebSocket) -> None:
         if active_connections.get(user_ip):
-            await websocket.close(code=1013, reason="This IP already has a connection")
+            await websocket.close(code=1013, reason='This IP already has a connection')
             logger.error(f'User IP already connected {user_ip}')
             raise HTTPException(status_code=HTTPStatus.CONFLICT)
 
@@ -34,7 +35,7 @@ class ChatService:
     @staticmethod
     async def disconnect(websocket: WebSocket) -> None:
         try:
-            await websocket.close(code=1000, reason="Disconnected by server")
+            await websocket.close(code=1000, reason='Disconnected by server')
         except RuntimeError:
             pass
         finally:
@@ -87,8 +88,6 @@ class ChatService:
                 },
                 data_type='json'
             )
-            logger.info(f'Room created: {room_id}; room participants: {active_rooms[room_id]}')
-
             return
 
         wait_rooms[chat_group] = new_user_ip
@@ -109,20 +108,10 @@ class ChatService:
                         await websocket.send_text(data)
                     case 'json':
                         await websocket.send_json(data)
-                    case 'binary':
+                    case 'bytes':
                         await websocket.send_bytes(data)
                     case _:
-                        logger.error(f"Unsupported data type: {data_type}; room: {room_id}")
-
-    async def send_message(self, user_ip: str, message: str) -> None:
-        user_connection = active_connections.get(user_ip)
-        if not user_connection:
-            return
-        if not user_connection['room_id']:
-            raise user_connection['websocket'].send_json(data={'status': ErrorMessages.ROOM_NOT_FOUND.status,
-                                                               'detail': ErrorMessages.ROOM_NOT_FOUND.detail})
-        logger.info(f'Send message user_ip: {user_ip}, message: {message}')
-        await self.broadcast(room_id=user_connection['room_id'], data=message)
+                        logger.error(f'Unsupported data type: {data_type}; room: {room_id}')
 
     @staticmethod
     async def delete_wait_room(user_ip) -> None:
@@ -130,6 +119,41 @@ class ChatService:
             if value == user_ip:
                 del wait_rooms[key]
                 logger.info(f'Delete wait room {key}')
+
+    @staticmethod
+    async def get_user_connection(user_ip: str) -> dict | None:
+        user_connection = active_connections.get(user_ip)
+        if not user_connection:
+            logger.error(f'User {user_ip} not connected')
+            return
+        if not user_connection['room_id']:
+            await user_connection['websocket'].send_json(data={'status': ErrorMessages.ROOM_NOT_FOUND.status,
+                                                               'detail': ErrorMessages.ROOM_NOT_FOUND.detail})
+            return
+
+        return user_connection
+
+    async def send_message(self, user_ip: str, message: str) -> None:
+        user_connection = await self.get_user_connection(user_ip)
+        if not user_connection:
+            return
+
+        logger.info(f'Send message user_ip: {user_ip}, message: {message}')
+        await self.broadcast(room_id=user_connection['room_id'], data=message)
+
+    async def send_file(self, user_ip: str, data: bytes) -> None:
+        user_connection = await self.get_user_connection(user_ip)
+        if not user_connection:
+            return
+
+        image_type = imghdr.what(None, data)
+        if image_type:
+            logger.debug(f'Client {user_ip} sent {image_type} image: {data}')
+            await self.broadcast(room_id=user_connection['room_id'], data=data, data_type='bytes')
+        else:
+            logger.info(f'Client {user_ip} sent a non-image file')
+            await user_connection['websocket'].send_json(data={'status': ErrorMessages.INVALID_FILE_FORMAT.status,
+                                                               'detail': ErrorMessages.INVALID_FILE_FORMAT.detail})
 
 
 async def get_chat_service():
