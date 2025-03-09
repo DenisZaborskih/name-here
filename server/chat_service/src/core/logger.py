@@ -62,18 +62,22 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
-        'chat_service.src.services.chat': {
-            'handlers': ['console', 'chat_file_handler'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-        'chat_service.src.api.v1.chat': {
-            'handlers': ['console', 'chat_file_handler'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
     },
 }
+
+chat_loggers_config = [
+    'chat_service.src.api.v1.chat',
+    'chat_service.src.services.connection',
+    'chat_service.src.services.message',
+    'chat_service.src.services.room',
+]
+
+for logger_name in chat_loggers_config:
+    LOGGING['loggers'][logger_name] = {
+        'handlers': ['console', 'chat_file_handler'],
+        'level': 'DEBUG',
+        'propagate': False,
+    }
 
 
 def setup_logging(debug=False):
