@@ -1,12 +1,12 @@
 import { Injectable } from '@angular/core';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatGroupService {
 
-  public chatGroup$ = new Subject<string>();
+  public chatGroup$ = new BehaviorSubject<string | null>(null);
 
   public changeGroup(group : string){
     this.chatGroup$.next(group);

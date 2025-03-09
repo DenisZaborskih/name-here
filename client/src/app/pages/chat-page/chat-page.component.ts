@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
+import { ChatGroupService } from '../../services/chat-group.service';
+import { Subscription } from 'rxjs';
 
 enum State {
   Active,
@@ -15,10 +17,31 @@ enum State {
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
-export class ChatPageComponent {
+export class ChatPageComponent implements OnInit, OnDestroy {
   public State = State;
   private state: State = State.Active;
   private canAddPhoto: Boolean = true;
+  private subscription!: Subscription
+
+  constructor(
+    private chatGroupService: ChatGroupService,
+  ) { }
+
+  ngOnInit() {
+    this.subscription = this.chatGroupService.chatGroup$.subscribe((chatGroup) => {
+      if (chatGroup) {
+        this.log(chatGroup);
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) this.subscription.unsubscribe();
+  }
+
+  private log(data: string) {
+    console.log(data);
+  }
 
   getCanAddPhoto() {
     return this.canAddPhoto;
