@@ -56,4 +56,4 @@ async def websocket_chat(
         else:
             logger.error(f'Error: {e}')
     finally:
-        await room_service.close_user_room(user_ip)
+        await room_service.leave_room(user_ip)

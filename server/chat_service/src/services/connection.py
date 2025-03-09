@@ -5,7 +5,6 @@ from http import HTTPStatus
 from fastapi import WebSocket, HTTPException
 
 from chat_service.src.data import active_connections
-from chat_service.src.utils.messages import ErrorMessages
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -37,17 +36,8 @@ class ConnectionService:
             logger.info(f'User disconnected: {websocket}')
 
     @staticmethod
-    async def get_user_connection(user_ip: str) -> dict | None:
-        user_connection = active_connections.get(user_ip)
-        if not user_connection:
-            logger.error(f'User {user_ip} not connected')
-            return
-        if not user_connection['room_id']:
-            await user_connection['websocket'].send_json(data={'status': ErrorMessages.ROOM_NOT_FOUND.status,
-                                                               'detail': ErrorMessages.ROOM_NOT_FOUND.detail})
-            return
-
-        return user_connection
+    async def get_user_connection(user_ip: str) -> dict[str, str | WebSocket] | None:
+        return active_connections.get(user_ip)
 
     async def delete_user_connection(self, user_ip: str) -> None:
         user_connection = active_connections.pop(user_ip, None)
