@@ -48,6 +48,7 @@ def get_global_settings() -> GlobalSettings:
     return GlobalSettings()
 
 
+@lru_cache()
 def init_logging():
     setup_logging(debug=settings.debug)
 
