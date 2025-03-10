@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
 import { Subscription } from 'rxjs';
+import { WebSocketService } from '../../services/websocket.service';
 
 enum State {
   Active,
@@ -19,18 +20,21 @@ enum State {
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
   public State = State;
-  private state: State = State.Active;
+  private state!: State;
   private canAddPhoto: Boolean = true;
   private subscription!: Subscription
 
   constructor(
     private chatGroupService: ChatGroupService,
+    private wsService : WebSocketService
   ) { }
 
   ngOnInit() {
     this.subscription = this.chatGroupService.chatGroup$.subscribe((chatGroup) => {
       if (chatGroup) {
         this.log(chatGroup);
+        this.state = State.Search;
+        this.wsService.initWebSocket(chatGroup);
       }
     });
   }

@@ -13,7 +13,8 @@ export class WebSocketService {
   private ws!: WebSocket;
   private messageSubject = new BehaviorSubject<string | null>(null);
 
-  public initWebSocket() {
+  public initWebSocket(chatGroup : string) {
+    this.ws = new WebSocket(`ws://localhost/api/v1/chat/ws/${chatGroup}`);
     this.ws.onopen = () => {
       console.log(`WebSocket init success`);
     }
