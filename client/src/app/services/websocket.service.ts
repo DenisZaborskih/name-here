@@ -1,6 +1,6 @@
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 export interface Message {
   content: string;
@@ -31,9 +31,10 @@ export class WebSocketService {
   public sendMessage(msg: string) {
     if (this.ws.readyState === WebSocket.OPEN && this.ws) {
       this.ws.send(msg);
+      console.log(`Message ${msg} sent!`);
     }
     else {
-      console.error(`WebSocket error while send msg/ robably not open`);
+      console.error(`send message error`);
     }
   }
 

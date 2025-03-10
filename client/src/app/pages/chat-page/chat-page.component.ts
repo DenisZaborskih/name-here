@@ -1,9 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
 import { Subscription } from 'rxjs';
-import { WebSocketService } from '../../services/websocket.service';
+import { Message, WebSocketService } from '../../services/websocket.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 
 enum State {
   Active,
@@ -14,20 +15,33 @@ enum State {
 @Component({
   selector: 'app-chat-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLink],
+  imports: [CommonModule, RouterModule, RouterLink, ReactiveFormsModule],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
 export class ChatPageComponent implements OnInit, OnDestroy {
   public State = State;
+  public msgForm: FormGroup;
+  public messageArray: Message[] = [];
+
+
   private state!: State;
-  private canAddPhoto: Boolean = true;
+  private isPhoto: boolean = true;
   private subscription!: Subscription
+  private message: Message = {
+    content: "",
+    isMine: true
+  }
 
   constructor(
     private chatGroupService: ChatGroupService,
-    private wsService : WebSocketService
-  ) { }
+    private wsService: WebSocketService,
+    private fb: FormBuilder,
+  ) {
+    this.msgForm = this.fb.group({
+      msg: ['', [Validators.required, Validators.minLength(1)]],
+    })
+  }
 
   ngOnInit() {
     this.subscription = this.chatGroupService.chatGroup$.subscribe((chatGroup) => {
@@ -44,11 +58,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   private log(data: string) {
-    console.log(data);
+    console.log(`Logged data: ${data}`);
   }
 
-  getCanAddPhoto() {
-    return this.canAddPhoto;
+  getIsPhoto() {
+    return this.isPhoto;
   }
 
   getState() {
@@ -60,15 +74,31 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   sendMessage() {
-    //TODO: отправка сообщений
+    if (this.msgForm.valid) {
+      const msgText = this.msgForm.get('msg')?.value;
+      this.wsService.sendMessage(msgText);
+      if (this.canAddPhoto()) {
+        this.message = {
+          content: msgText,
+          isMine: true,
+          isImage: this.addPhoto()
+        }
+        this.messageArray.push(this.message);
+        this.msgForm.reset();
+      }
+    }
   }
 
   sendReport() {
     //TODO: отправка жалоб
   }
 
+  canAddPhoto() {
+    //TODO: проверка отрпавки фото
+    return true;
+  }
+
   addPhoto() {
-    //TODO: проверка размера изображений и отправка в случае разрешения
-    this.canAddPhoto = !this.canAddPhoto;
+    return true;
   }
 }
