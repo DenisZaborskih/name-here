@@ -19,7 +19,7 @@ class MessageService:
         self.send_service = send_service
         self.room_service = room_service
 
-    async def _validate_send_conditions(self, user_ip: str, user_connection: dict) -> bool:
+    async def _room_exist(self, user_connection: dict) -> bool:
         room_id = user_connection['room_id']
         if not room_id:
             await self.send_service.send(
@@ -28,7 +28,10 @@ class MessageService:
                       'detail': ErrorMessages.ROOM_NOT_FOUND.detail}
             )
             return False
-        if not await self.room_service.get_active_chatmate(user_ip, room_id):
+        return True
+
+    async def _chatmate_exist(self, user_connection: dict, chatmate_connection: dict) -> bool:
+        if not chatmate_connection:
             await self.send_service.send(
                 websocket=user_connection['websocket'],
                 data={'status': Messages.PARTICIPANT_LEFT.status,
@@ -39,25 +42,39 @@ class MessageService:
 
     async def send_message(self, user_ip: str, message: str) -> None:
         user_connection = await self.connection_service.get_user_connection(user_ip)
-        if not user_connection:
+        if not await self._room_exist(user_connection):
             return
-        if not await self._validate_send_conditions(user_ip, user_connection):
+        chatmate_connection = await self.room_service.get_active_chatmate(user_ip, user_connection['room_id'])
+        if not await self._chatmate_exist(user_connection, chatmate_connection):
             return
 
         logger.info(f'Send message user_ip: {user_ip}, message: {message}')
-        await self.send_service.broadcast(room_id=user_connection['room_id'], data=message)
+        await self.send_service.send(data=message, data_type='text', websocket=chatmate_connection['websocket'])
+        await self.send_service.send(
+            data={'status': Messages.SENT.status,
+                  'detail': Messages.SENT.detail},
+            data_type='json',
+            websocket=user_connection['websocket']
+        )
 
     async def send_file(self, user_ip: str, data: bytes) -> None:
         user_connection = await self.connection_service.get_user_connection(user_ip)
-        if not user_connection:
+        if not await self._room_exist(user_connection):
             return
-        if not await self._validate_send_conditions(user_ip, user_connection):
+        chatmate_connection = await self.room_service.get_active_chatmate(user_ip, user_connection['room_id'])
+        if not await self._chatmate_exist(user_connection, chatmate_connection):
             return
 
         image_type = imghdr.what(None, data)
         if image_type:
             logger.debug(f'Client {user_ip} sent {image_type} of size {len(data)} bytes, image: {data!r}')
-            await self.send_service.broadcast(room_id=user_connection['room_id'], data=data, data_type='bytes')
+            await self.send_service.send(data=data, data_type='bytes', websocket=chatmate_connection['websocket'])
+            await self.send_service.send(
+                data={'status': Messages.SENT.status,
+                      'detail': Messages.SENT.detail},
+                data_type='json',
+                websocket=user_connection['websocket']
+            )
         else:
             logger.info(f'Client {user_ip} sent a non-image file')
             await self.send_service.send(
@@ -65,6 +82,14 @@ class MessageService:
                 data={'status': ErrorMessages.INVALID_FILE_FORMAT.status,
                       'detail': ErrorMessages.INVALID_FILE_FORMAT.detail}
             )
+
+    async def notify_of_blocking(self, user_ip: str) -> None:
+        await self.send_service.send(
+            data={'status': ErrorMessages.IP_IS_BLACKLISTED.status,
+                  'detail': ErrorMessages.IP_IS_BLACKLISTED.detail},
+            data_type='json',
+            user_ip=user_ip
+        )
 
 
 @lru_cache()

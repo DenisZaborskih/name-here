@@ -40,8 +40,6 @@ class RoomService:
 
     async def leave_room(self, user_ip: str) -> None:
         user_connection = await self.connection_service.get_user_connection(user_ip)
-        if not user_connection:
-            return
 
         room_id = user_connection['room_id']
         if not room_id:
@@ -106,6 +104,9 @@ class RoomService:
         return chatmate_ip
 
     async def get_active_chatmate(self, user_ip: str, room_id: str | None = None) -> dict[str, str | WebSocket] | None:
+        if not room_id:
+            user_connection = await self.connection_service.get_user_connection(user_ip)
+            room_id = user_connection['room_id']
         chatmate_ip = await self.get_chatmate_ip(user_ip, room_id)
         chatmate_connection = await self.connection_service.get_user_connection(chatmate_ip)
         if not chatmate_connection or chatmate_connection['room_id'] != room_id:

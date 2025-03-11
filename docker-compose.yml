@@ -36,9 +36,7 @@ services:
     depends_on:
       chat_service:
         condition: service_started
-    networks:
-      backend_network:
-        ipv4_address: 172.24.0.10
+    <<: *common-variables
 
   chat_service:
     build:
@@ -63,8 +61,3 @@ volumes:
 networks:
   backend_network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.24.0.0/16
-          gateway: 172.24.0.1
-          ip_range: 172.24.0.128/25

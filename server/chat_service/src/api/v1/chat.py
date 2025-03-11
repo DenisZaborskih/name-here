@@ -42,11 +42,13 @@ async def websocket_chat(
     if settings.debug:
         user_ip += f':{websocket.client.port}'
 
-    if await blacklist_service.check_blacklist(user_ip):
-        logger.info(f'Blacklisted user {user_ip} trued to connect to {chat_group}')
-        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='IP is blacklisted')
-
     await connection_service.connect(user_ip, websocket)
+
+    if await blacklist_service.check_blacklist(user_ip):
+        await message_service.notify_of_blocking(user_ip)
+        logger.info(f'Blacklisted user {user_ip} trued to connect to {chat_group}')
+        await connection_service.delete_user_connection(user_ip)
+        return
 
     try:
         await room_service.connect_room(user_ip, chat_group)
@@ -57,20 +59,20 @@ async def websocket_chat(
                 try:
                     json_data = json.loads(data['text'])
                     action = json_data.get('action')
-                    if action:
-                        if action == 'report':
-                            chatmate_ip = await room_service.get_chatmate_ip(user_ip)
-                            await blacklist_service.report(user_ip, chatmate_ip)
-                        else:
-                            await send_service.send(
-                                user_ip=user_ip,
-                                data={
-                                    'status': ErrorMessages.UNSUPPORTED_ACTION.status,
-                                    'detail': ErrorMessages.UNSUPPORTED_ACTION.detail
-                                }
-                            )
-                    else:
+                    if action == 'report':
+                        chatmate_ip = await room_service.get_chatmate_ip(user_ip)
+                        await blacklist_service.report(user_ip, chatmate_ip)
+                    elif action == 'send':
                         await message_service.send_message(user_ip, data['text'])
+                    else:
+                        await send_service.send(
+                            user_ip=user_ip,
+                            data={
+                                'status': ErrorMessages.UNSUPPORTED_ACTION.status,
+                                'detail': ErrorMessages.UNSUPPORTED_ACTION.detail
+                            }
+                        )
+                        logger.error(f'User {user_ip} send not supported action: {action}')
                 except json.JSONDecodeError:
                     logger.error(f'User {user_ip} send not JSON serializable data: {data["text"]}')
             elif data.get('bytes'):
