@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { ChatGroupService } from '../../services/chat-group.service';
 
 @Component({
   selector: 'app-start-page',
@@ -10,8 +11,8 @@ import { Router } from '@angular/router';
   styleUrl: './start-page.component.scss'
 })
 export class StartPageComponent {
-
-  private router : Router = inject(Router);
+  private router: Router = inject(Router);
+  private selectedCategory: string | null = null;
 
   categories = [
     "Россия",
@@ -30,7 +31,8 @@ export class StartPageComponent {
     "Южная Корея",
     "Египет"
   ];
-  private selectedCategory: string | null = null;
+
+  constructor(private chatGroupService: ChatGroupService) { }
 
   toggleCategory(category: string) {
     this.selectedCategory = this.selectedCategory === category ? null : category;
@@ -44,6 +46,9 @@ export class StartPageComponent {
     if (this.selectedCategory === null) {
       alert("Вы не выбрали ни одной категории!");
     }
-    else this.router.navigate(["/chat"]);
+    else {
+      this.chatGroupService.changeGroup(this.selectedCategory);
+      this.router.navigate(["/chat"]);
+    }
   }
 }
