@@ -2,11 +2,11 @@ import logging
 import uuid
 from functools import lru_cache
 
-from fastapi import Depends
+from fastapi import Depends, WebSocket
 
 from chat_service.src.data import wait_rooms, active_rooms, active_connections
 from chat_service.src.services.connection import ConnectionService, get_connection_service
-from chat_service.src.services.message import MessageService, get_message_service
+from chat_service.src.services.send import SendService, get_send_service
 from chat_service.src.utils.messages import Messages
 
 logging.basicConfig(level=logging.DEBUG)
@@ -14,9 +14,9 @@ logger = logging.getLogger(__name__)
 
 
 class RoomService:
-    def __init__(self, connection_service: ConnectionService, message_service: MessageService):
+    def __init__(self, connection_service: ConnectionService, send_service: SendService):
         self.connection_service = connection_service
-        self.message_service = message_service
+        self.send_service = send_service
 
     @staticmethod
     async def get_wait_rooms() -> list:
@@ -38,30 +38,42 @@ class RoomService:
         logger.info(f'Room created: {room_id}; room participants: {user_ips}')
         return room_id
 
-    async def close_user_room(self, user_ip: str) -> None:
-        user_connection = active_connections.get(user_ip)
-        if user_connection:
-            room_id = user_connection['room_id']
-            if room_id:
-                await self.delete_room(room_id)
-            else:
-                await self.delete_wait_room(user_ip)
+    async def leave_room(self, user_ip: str) -> None:
+        user_connection = await self.connection_service.get_user_connection(user_ip)
 
-    async def delete_room(self, room_id: str) -> None:
+        room_id = user_connection['room_id']
+        if not room_id:
+            await self.connection_service.delete_user_connection(user_ip)
+            await self.delete_wait_room(user_ip)
+            return
+
+        chatmate_connection = await self.get_active_chatmate(user_ip, room_id)
+        if not chatmate_connection:
+            await self.connection_service.delete_user_connection(user_ip)
+            await self.delete_room(room_id)
+            return
+
+        await self.connection_service.delete_user_connection(user_ip)
+        logger.info(f'User: {user_ip} left room: {room_id}')
+        await self.send_service.send(
+            websocket=chatmate_connection['websocket'],
+            data={'status': Messages.PARTICIPANT_LEFT.status,
+                  'detail': Messages.PARTICIPANT_LEFT.detail}
+        )
+
+    @staticmethod
+    async def delete_room(room_id: str) -> None:
         user_ips = active_rooms.pop(room_id, None)
         logger.info(f'Room deleted: {room_id}; room participants: {user_ips}')
-        if user_ips:
-            for user_ip in user_ips:
-                await self.connection_service.delete_user_connection(user_ip)
 
-    async def connect_room(self, new_user_ip: str, chat_group: str) -> None:
+    async def connect_room(self, user_ip: str, chat_group: str) -> None:
         waiting_user_ip = wait_rooms.get(chat_group)
-        new_user_websocket = active_connections[new_user_ip]
+        user_connection = await self.connection_service.get_user_connection(user_ip)
 
         if waiting_user_ip:
-            room_id = await self.create_room(user_ips=(waiting_user_ip, new_user_ip))
+            room_id = await self.create_room(user_ips=(waiting_user_ip, user_ip))
             wait_rooms.pop(chat_group, None)
-            await self.message_service.broadcast(
+            await self.send_service.broadcast(
                 room_id=room_id,
                 data={
                     'status': Messages.CHAT_ROOM_CREATED.status,
@@ -72,16 +84,40 @@ class RoomService:
             )
             return
 
-        wait_rooms[chat_group] = new_user_ip
-        logger.info(f'Waiting room created: {chat_group}; participant: {new_user_ip}')
+        wait_rooms[chat_group] = user_ip
+        logger.info(f'Waiting room created: {chat_group}; participant: {user_ip}')
 
-        await new_user_websocket['websocket'].send_json(data={'status': Messages.WAITING_ROOM_CREATED.status,
-                                                              'detail': Messages.WAITING_ROOM_CREATED.detail})
+        await self.send_service.send(
+            websocket=user_connection['websocket'],
+            data={
+                'status': Messages.WAITING_ROOM_CREATED.status,
+                'detail': Messages.WAITING_ROOM_CREATED.detail
+            }
+        )
+
+    async def get_chatmate_ip(self, user_ip: str, room_id: str | None = None) -> str:
+        if not room_id:
+            user_connection = await self.connection_service.get_user_connection(user_ip)
+            room_id = user_connection['room_id']
+        user_ips = active_rooms.get(room_id)
+        chatmate_ip = next(ip for ip in user_ips if ip != user_ip)
+        return chatmate_ip
+
+    async def get_active_chatmate(self, user_ip: str, room_id: str | None = None) -> dict[str, str | WebSocket] | None:
+        if not room_id:
+            user_connection = await self.connection_service.get_user_connection(user_ip)
+            room_id = user_connection['room_id']
+        chatmate_ip = await self.get_chatmate_ip(user_ip, room_id)
+        chatmate_connection = await self.connection_service.get_user_connection(chatmate_ip)
+        if not chatmate_connection or chatmate_connection['room_id'] != room_id:
+            return None
+
+        return chatmate_connection
 
 
 @lru_cache()
 def get_room_service(
         connection_service: ConnectionService = Depends(get_connection_service),
-        message_service: MessageService = Depends(get_message_service)
+        send_service: SendService = Depends(get_send_service)
 ) -> RoomService:
-    return RoomService(connection_service, message_service)
+    return RoomService(connection_service, send_service)

@@ -48,6 +48,12 @@ LOGGING = {
             'filename': 'logs/chat.log',
             'formatter': 'verbose',
         },
+        'blacklist_file_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'logs/blacklist.log',
+            'formatter': 'verbose',
+        },
     },
     'loggers': {
         '': {
@@ -55,13 +61,18 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'uvicorn.error': {
-            'level': 'INFO',
+            'level': 'WARNING',
         },
         'uvicorn.access': {
             'handlers': ['access'],
-            'level': 'INFO',
+            'level': 'WARNING',
             'propagate': False,
         },
+        'chat_service.src.services.blacklist': {
+            'handlers': ['console', 'blacklist_file_handler'],
+            'level': 'DEBUG',
+            'propagate': False,
+        }
     },
 }
 
@@ -70,6 +81,7 @@ chat_loggers_config = [
     'chat_service.src.services.connection',
     'chat_service.src.services.message',
     'chat_service.src.services.room',
+    'chat_service.src.services.send',
 ]
 
 for logger_name in chat_loggers_config:
