@@ -15,7 +15,6 @@ class ConnectionService:
     @staticmethod
     async def connect(user_ip: str, websocket: WebSocket) -> None:
         if active_connections.get(user_ip):
-            await websocket.close(code=1013, reason='This IP already has a connection')
             logger.error(f'User IP already connected {user_ip}')
             raise HTTPException(status_code=HTTPStatus.CONFLICT)
 

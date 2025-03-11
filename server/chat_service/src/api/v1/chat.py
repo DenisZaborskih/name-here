@@ -1,13 +1,16 @@
+import json
 import logging
-from random import choice
 from http import HTTPStatus
 
 from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect, HTTPException
 
+from chat_service.src.services.blacklist import BlacklistService, get_blacklist_service
 from chat_service.src.services.connection import ConnectionService, get_connection_service
 from chat_service.src.services.message import MessageService, get_message_service
 from chat_service.src.services.room import RoomService, get_room_service
+from chat_service.src.services.send import get_send_service, SendService
 from chat_service.src.core.config import get_global_settings
+from chat_service.src.utils.messages import ErrorMessages
 
 settings = get_global_settings()
 
@@ -23,14 +26,25 @@ async def websocket_chat(
         chat_group: str,
         room_service: RoomService = Depends(get_room_service),
         connection_service: ConnectionService = Depends(get_connection_service),
-        message_service: MessageService = Depends(get_message_service)
+        send_service: SendService = Depends(get_send_service),
+        message_service: MessageService = Depends(get_message_service),
+        blacklist_service: BlacklistService = Depends(get_blacklist_service)
 ) -> None:
-    if not websocket.client:
+    logger.debug(f'Client handshake request {websocket.__dict__}')
+
+    headers = websocket.scope.get('headers')
+    real_ip = next((value for key, value in headers if key == b'x-real-ip'), None)
+    if real_ip:
+        user_ip = real_ip.decode()
+    else:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Missing client address')
 
-    user_ip = websocket.client.host
     if settings.debug:
-        user_ip += choice('qwertyuikopasdfghjklzxcvbnm')
+        user_ip += f':{websocket.client.port}'
+
+    if await blacklist_service.check_blacklist(user_ip):
+        logger.info(f'Blacklisted user {user_ip} trued to connect to {chat_group}')
+        raise HTTPException(status_code=HTTPStatus.FORBIDDEN, detail='IP is blacklisted')
 
     await connection_service.connect(user_ip, websocket)
 
@@ -40,7 +54,25 @@ async def websocket_chat(
         while True:
             data = await websocket.receive()
             if data.get('text'):
-                await message_service.send_message(user_ip, data['text'])
+                try:
+                    json_data = json.loads(data['text'])
+                    action = json_data.get('action')
+                    if action:
+                        if action == 'report':
+                            chatmate_ip = await room_service.get_chatmate_ip(user_ip)
+                            await blacklist_service.report(user_ip, chatmate_ip)
+                        else:
+                            await send_service.send(
+                                user_ip=user_ip,
+                                data={
+                                    'status': ErrorMessages.UNSUPPORTED_ACTION.status,
+                                    'detail': ErrorMessages.UNSUPPORTED_ACTION.detail
+                                }
+                            )
+                    else:
+                        await message_service.send_message(user_ip, data['text'])
+                except json.JSONDecodeError:
+                    logger.error(f'User {user_ip} send not JSON serializable data: {data["text"]}')
             elif data.get('bytes'):
                 logger.info(f'Client {user_ip} sent a binary message')
                 await message_service.send_file(user_ip, data['bytes'])

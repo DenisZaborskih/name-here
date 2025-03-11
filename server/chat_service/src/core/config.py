@@ -23,6 +23,7 @@ class CommonSettings(BaseSettings):
 class GlobalSettings(CommonSettings):
     project_name: str = Field(alias='PROJECT_NAME', default='chat')
     debug: bool = Field(alias='DEBUG', default=False)
+    count_report_for_ban: int = Field(alias='COUNT_REPORT_FOR_BAN', default=10)
 
 
 class RedisSettings(CommonSettings):
