@@ -73,11 +73,18 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.state = current;
   }
 
+  onEnterPressed(event : Event){
+    const keyEvent = event as KeyboardEvent;
+    if(!keyEvent.shiftKey){
+      event.preventDefault();
+      this.sendMessage();
+    }
+  }
+
   sendMessage() {
     if (this.msgForm.valid) {
       const msgText = this.msgForm.get('msg')?.value;
-      this.wsService.sendMessage(msgText);
-      if (this.canAddPhoto()) {
+      if (this.canAddPhoto() && this.wsService.sendMessage(msgText)) {
         this.message = {
           content: msgText,
           isMine: true,

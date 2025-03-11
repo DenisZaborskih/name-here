@@ -42,11 +42,9 @@
           *ngSwitchCase="State.Active"
           class="chat-container__window_dialogue"
         >
-          <div
-            class="chat-container__message-area"
-            *ngFor="let msg of messageArray"
-          >
+          <div class="chat-container__message-area">
             <p
+              *ngFor="let msg of messageArray"
               [class.chat-container__message_my]="msg.isMine"
               [class.chat-container__message_interlocutor]="!msg.isMine"
             >
@@ -67,6 +65,7 @@
                 id="message-write"
                 class="message-type__message-write"
                 placeholder="Начните печатать"
+                (keydown.enter)="onEnterPressed($event)"
               ></textarea>
               <button
                 class="message-type__image-button"

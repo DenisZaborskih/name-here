@@ -11,7 +11,6 @@ export interface Message {
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private ws!: WebSocket;
-  private messageSubject = new BehaviorSubject<string | null>(null);
 
   public initWebSocket(chatGroup : string) {
     this.ws = new WebSocket(`ws://localhost/api/v1/chat/ws/${chatGroup}`);
@@ -20,7 +19,8 @@ export class WebSocketService {
     }
 
     this.ws.onmessage = (event) => {
-      this.messageSubject.next(event.data);
+      console.log(`message handled!!!`);
+      this.recieveMessage(event.data);
     }
 
     this.ws.onerror = (error) => {
@@ -32,9 +32,17 @@ export class WebSocketService {
     if (this.ws.readyState === WebSocket.OPEN && this.ws) {
       this.ws.send(msg);
       console.log(`Message ${msg} sent!`);
+      return true;
     }
     else {
       console.error(`send message error`);
+      return false;
+    }
+  }
+
+  public recieveMessage(data : any){
+    if(typeof(data) === 'string'){
+
     }
   }
 
