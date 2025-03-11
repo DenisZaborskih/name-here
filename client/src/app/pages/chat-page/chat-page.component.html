@@ -48,17 +48,37 @@
               [class.chat-container__message_my]="msg.isMine"
               [class.chat-container__message_interlocutor]="!msg.isMine"
             >
-              {{ msg.content }}
+              <span *ngIf="msg.content">{{ msg.content }}</span>
+              <img
+                *ngIf="msg.imgURL"
+                [src]="msg.imgURL"
+                alt="Chat Image"
+                class="chat-image"
+              />
             </p>
           </div>
           <div class="add-error">
             <p
               class="add-photo-error"
-              [class.add-photo-error_disabled]="getIsPhoto()"
+              [class.add-photo-error_disabled]="canAddFile"
             >
-              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ ???МБ
+              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ {{MAX_IMAGE_SIZE / 1024 / 1024}} МБ <br>
+              ВОЗМОЖНО НЕ ТОТ ТИП ФАЙЛА
             </p>
             <div class="message-type" [formGroup]="msgForm">
+              <div class="image-preview" *ngIf="imagePreview">
+                <img
+                  [src]="imagePreview"
+                  alt="Preview"
+                  class="image-preview__image"
+                />
+                <button
+                  class="image-preview__remove-button"
+                  (click)="removeImage()"
+                >
+                  х
+                </button>
+              </div>
               <textarea
                 formControlName="msg"
                 name="message-write"
@@ -67,14 +87,22 @@
                 placeholder="Начните печатать"
                 (keydown.enter)="onEnterPressed($event)"
               ></textarea>
-              <button
+              <input
+                type="file"
+                id="file-input"
                 class="message-type__image-button"
-                (click)="addPhoto()"
-              ></button>
+                accept="image/*"
+                style="display: none"
+                (change)="handleFileInput($event)"
+              />
+              <label
+                for="file-input"
+                class="message-type__image-button"
+              ></label>
               <button
                 class="message-type__send-button"
-                [class.message-type__send-button_disabled]="!getIsPhoto()"
-                [disabled]="!getIsPhoto()"
+                [class.message-type__send-button_disabled]="!canAddFile"
+                [disabled]="!canAddFile"
                 (click)="sendMessage()"
               ></button>
             </div>

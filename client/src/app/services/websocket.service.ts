@@ -16,6 +16,7 @@ export class WebSocketService {
 
     this.ws.onmessage = (event) => {
       try {
+        console.log(event);
         const msg = this.recieveMessage(event.data);
         console.log('message handled:', msg?.content);
         this.messageSubject.next(msg ? msg : null);
@@ -30,18 +31,41 @@ export class WebSocketService {
     }
   }
 
-  public sendMessage(msg: string, uid : string) {
+  public sendMessage(msg: string, senderId: string): boolean {
     if (this.ws.readyState === WebSocket.OPEN && this.ws) {
-      const msgPayload = {
+      const messageWithSender = {
         content: msg,
-        senderId: uid
-      }
-      this.ws.send(JSON.stringify(msgPayload));
-      console.log(`Message ${msg} sent!`);
+        senderId: senderId,
+      };
+      this.ws.send(JSON.stringify(messageWithSender));
+      console.log(`[WebSocketService] Сообщение отправлено: ${msg}`);
       return true;
+    } else {
+      console.error("[WebSocketService] Ошибка отправки сообщения: WebSocket не открыт");
+      return false;
     }
-    else {
-      console.error(`send message error`);
+  }
+
+  public sendFile(file: File, senderId: string): boolean {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        if (typeof reader.result === 'string') {
+          const base64Data = reader.result.split(',')[1];
+          const message = {
+            type: "file",
+            fileData: base64Data,
+            senderId: senderId,
+            mimeType: file.type
+          }
+          this.ws.send(JSON.stringify(message));
+          console.log("[WebSocketService] Файл отправлен как base64");
+        }
+      };
+      reader.readAsDataURL(file);
+      return true;
+    } else {
+      console.error("[WebSocketService] Ошибка отправки файла: WebSocket не открыт");
       return false;
     }
   }
@@ -50,6 +74,10 @@ export class WebSocketService {
     if (typeof data === 'string') {
       try {
         const jsonData = JSON.parse(data);
+        if (jsonData.type === "file") {
+          const url = `data:${jsonData.mimeType};base64,${jsonData.fileData}`
+          return this.createMessage(null, url, false, jsonData.senderId);
+        }
         return this.createMessage(jsonData.content, null, true, jsonData.senderId);
       } catch (e) {
         return this.createMessage(data, null, false, null);
@@ -75,7 +103,7 @@ export class WebSocketService {
     }
   }
 
-  generateUserId() {
+  public generateUserId() {
     return Math.random().toString(36).substring(2, 9);
   }
 }
