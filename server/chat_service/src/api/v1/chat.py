@@ -4,7 +4,9 @@ from http import HTTPStatus
 
 from fastapi import APIRouter, WebSocket, Depends, WebSocketDisconnect, HTTPException
 
-from chat_service.src.services.chat import ChatService, get_chat_service
+from chat_service.src.services.connection import ConnectionService, get_connection_service
+from chat_service.src.services.message import MessageService, get_message_service
+from chat_service.src.services.room import RoomService, get_room_service
 from chat_service.src.core.config import get_global_settings
 
 settings = get_global_settings()
@@ -19,8 +21,10 @@ router = APIRouter()
 async def websocket_chat(
         websocket: WebSocket,
         chat_group: str,
-        websocket_service: ChatService = Depends(get_chat_service)
-):
+        room_service: RoomService = Depends(get_room_service),
+        connection_service: ConnectionService = Depends(get_connection_service),
+        message_service: MessageService = Depends(get_message_service)
+) -> None:
     if not websocket.client:
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail='Missing client address')
 
@@ -28,18 +32,18 @@ async def websocket_chat(
     if settings.debug:
         user_ip += choice('qwertyuikopasdfghjklzxcvbnm')
 
-    await websocket_service.connect(user_ip, websocket)
+    await connection_service.connect(user_ip, websocket)
 
     try:
-        await websocket_service.connect_chat(user_ip, chat_group)
+        await room_service.connect_room(user_ip, chat_group)
 
         while True:
             data = await websocket.receive()
             if data.get('text'):
-                await websocket_service.send_message(user_ip, data['text'])
+                await message_service.send_message(user_ip, data['text'])
             elif data.get('bytes'):
                 logger.info(f'Client {user_ip} sent a binary message')
-                await websocket_service.send_file(user_ip, data['bytes'])
+                await message_service.send_file(user_ip, data['bytes'])
             elif data.get('type') != 'websocket.disconnect':
                 logger.error(f'Invalid message format from {user_ip}: {data}')
                 await websocket.close(code=1008, reason='Invalid message format')
@@ -52,4 +56,4 @@ async def websocket_chat(
         else:
             logger.error(f'Error: {e}')
     finally:
-        await websocket_service.close_user_room(user_ip)
+        await room_service.close_user_room(user_ip)
