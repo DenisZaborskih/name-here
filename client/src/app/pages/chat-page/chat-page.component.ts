@@ -1,10 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
 import { Subscription } from 'rxjs';
-import { Message, WebSocketService } from '../../services/websocket.service';
+import { WebSocketService } from '../../services/websocket.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Message } from '../../interfaces/message';
 
 enum State {
   Active,
@@ -24,14 +25,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   public msgForm: FormGroup;
   public messageArray: Message[] = [];
 
-
   private state!: State;
   private isPhoto: boolean = true;
-  private subscription!: Subscription
-  private message: Message = {
-    content: "",
-    isMine: true
-  }
+  private subscription!: Subscription;
+  private messageSubscription!: Subscription;
+  private userId: string;
 
   constructor(
     private chatGroupService: ChatGroupService,
@@ -40,7 +38,9 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ) {
     this.msgForm = this.fb.group({
       msg: ['', [Validators.required, Validators.minLength(1)]],
-    })
+    });
+
+    this.userId = this.wsService.generateUserId();
   }
 
   ngOnInit() {
@@ -51,10 +51,17 @@ export class ChatPageComponent implements OnInit, OnDestroy {
         this.wsService.initWebSocket(chatGroup);
       }
     });
+    this.messageSubscription = this.wsService.message$.subscribe((msg) => {
+      if (msg?.content) {
+        msg.isMine = msg.senderId === this.userId;
+        this.messageArray.push(msg);
+      }
+    });
   }
 
   ngOnDestroy() {
     if (this.subscription) this.subscription.unsubscribe();
+    if (this.messageSubscription) this.messageSubscription.unsubscribe();
   }
 
   private log(data: string) {
@@ -73,9 +80,9 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     this.state = current;
   }
 
-  onEnterPressed(event : Event){
+  onEnterPressed(event: Event) {
     const keyEvent = event as KeyboardEvent;
-    if(!keyEvent.shiftKey){
+    if (!keyEvent.shiftKey) {
       event.preventDefault();
       this.sendMessage();
     }
@@ -84,13 +91,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   sendMessage() {
     if (this.msgForm.valid) {
       const msgText = this.msgForm.get('msg')?.value;
-      if (this.canAddPhoto() && this.wsService.sendMessage(msgText)) {
-        this.message = {
-          content: msgText,
-          isMine: true,
-          isImage: this.addPhoto()
-        }
-        this.messageArray.push(this.message);
+      if (this.canAddPhoto() && this.wsService.sendMessage(msgText, this.userId)) {
         this.msgForm.reset();
       }
     }
@@ -106,6 +107,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   addPhoto() {
-    return true;
+    return null;
   }
 }
