@@ -91,7 +91,14 @@ export class ChatPageComponent implements OnInit, OnDestroy {
 
   sendMessage() {
     if (this.selectedFile) {
-      if (this.wsService.sendFile(this.selectedFile, this.userId)) {
+      if (this.wsService.sendFile(this.selectedFile)) {
+        this.messageArray.push({
+          content: null,
+          isMine: true,
+          imgURL: URL.createObjectURL(this.selectedFile),
+          isJSON: false,
+          senderId: null
+        })
         this.selectedFile = null;
         this.imagePreview = null;
         this.sendPhoto = false;
@@ -100,6 +107,13 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     } else if (this.msgForm.valid) {
       const msgText = this.msgForm.get('msg')?.value;
       if (this.wsService.sendMessage(msgText, this.userId)) {
+        this.messageArray.push({
+          content: msgText,
+          isMine: true,
+          imgURL: null,
+          isJSON: false,
+          senderId: null
+        })
         this.msgForm.reset();
         this.log("Текстовое сообщение отправлено");
       }

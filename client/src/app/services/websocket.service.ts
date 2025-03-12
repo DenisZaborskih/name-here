@@ -27,15 +27,16 @@ export class WebSocketService {
     }
 
     this.ws.onerror = (error) => {
-      console.error(`WebSocket was lost with error : ${error}`)
+      console.error('WebSocket was lost with error : ', error);
     }
   }
 
   public sendMessage(msg: string, senderId: string): boolean {
     if (this.ws.readyState === WebSocket.OPEN && this.ws) {
       const messageWithSender = {
-        content: msg,
+        action: 'send',
         senderId: senderId,
+        content: msg
       };
       this.ws.send(JSON.stringify(messageWithSender));
       console.log(`[WebSocketService] Сообщение отправлено: ${msg}`);
@@ -46,38 +47,28 @@ export class WebSocketService {
     }
   }
 
-  public sendFile(file: File, senderId: string): boolean {
+  public sendFile(file: File) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        if (typeof reader.result === 'string') {
-          const base64Data = reader.result.split(',')[1];
-          const message = {
-            type: "file",
-            fileData: base64Data,
-            senderId: senderId,
-            mimeType: file.type
-          }
-          this.ws.send(JSON.stringify(message));
-          console.log("[WebSocketService] Файл отправлен как base64");
-        }
-      };
-      reader.readAsDataURL(file);
-      return true;
-    } else {
-      console.error("[WebSocketService] Ошибка отправки файла: WebSocket не открыт");
-      return false;
+      try {
+        const reader = new FileReader();
+        reader.onload = () => {
+          this.ws.send(reader.result as ArrayBuffer);
+        };
+        reader.readAsArrayBuffer(file);
+        return true;
+      }
+      catch (e) {
+        console.error("error image sent: ", e);
+      }
     }
+    return false;
   }
 
   private recieveMessage(data: any) {
     if (typeof data === 'string') {
       try {
         const jsonData = JSON.parse(data);
-        if (jsonData.type === "file") {
-          const url = `data:${jsonData.mimeType};base64,${jsonData.fileData}`
-          return this.createMessage(null, url, false, jsonData.senderId);
-        }
+        console.log("jsondata: ", jsonData);
         return this.createMessage(jsonData.content, null, true, jsonData.senderId);
       } catch (e) {
         return this.createMessage(data, null, false, null);

@@ -47,6 +47,8 @@
               *ngFor="let msg of messageArray"
               [class.chat-container__message_my]="msg.isMine"
               [class.chat-container__message_interlocutor]="!msg.isMine"
+              [class.chat-container__message_contain-image_my]="msg.imgURL && msg.isMine"
+              [class.chat-container__message_contain-image_interloutor]="msg.imgURL && !msg.isMine"
             >
               <span *ngIf="msg.content">{{ msg.content }}</span>
               <img
