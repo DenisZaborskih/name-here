@@ -1,0 +1,49 @@
+.modal-window {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+
+  &__content {
+    background-image: url("../../../../public/assets/modal-tile.png");
+    background-size: cover;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    max-width: 750px;
+  }
+
+  &__gif {
+    width: 100%;
+    margin-bottom: 64px;
+  }
+
+  &__close-modal {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    width: 82px;
+    height: 82px;
+    background-image: url("../../../../public/assets/exit 1.png");
+    background-size: cover;
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+  }
+}
+
+.button-support {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+  width: 82px;
+  height: 82px;
+  background-image: url("../../../../public/assets/pale_green_tile\ 1.png");
+}

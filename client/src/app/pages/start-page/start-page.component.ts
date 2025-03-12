@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
-
+import { ModalNoCategoryComponent } from '../../modals/modal-no-category/modal-no-category.component';
 @Component({
   selector: 'app-start-page',
   standalone: true,
@@ -11,6 +11,9 @@ import { ChatGroupService } from '../../services/chat-group.service';
   styleUrl: './start-page.component.scss'
 })
 export class StartPageComponent {
+  @ViewChild('modalContainer', {read: ViewContainerRef, static: true})
+  container!: ViewContainerRef;
+
   private router: Router = inject(Router);
   private selectedCategory: string | null = null;
 
@@ -32,7 +35,8 @@ export class StartPageComponent {
     "Египет"
   ];
 
-  constructor(private chatGroupService: ChatGroupService) { }
+  constructor(private chatGroupService: ChatGroupService
+  ) { }
 
   toggleCategory(category: string) {
     this.selectedCategory = this.selectedCategory === category ? null : category;
@@ -44,7 +48,12 @@ export class StartPageComponent {
 
   goToChat() {
     if (this.selectedCategory === null) {
-      alert("Вы не выбрали ни одной категории!");
+      this.container.clear();
+      const componentRef = this.container.createComponent(ModalNoCategoryComponent);
+
+      componentRef.instance.closed.subscribe(()=>{
+        this.container.clear();
+      });
     }
     else {
       this.chatGroupService.changeGroup(this.selectedCategory);
