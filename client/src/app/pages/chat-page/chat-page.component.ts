@@ -31,7 +31,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   
   private selectedFile: File | null = null;
   private state!: State;
-  private isPhoto: boolean = true;
   private subscription!: Subscription;
   private messageSubscription!: Subscription;
   private userId: string;
@@ -58,7 +57,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     });
     this.messageSubscription = this.wsService.message$.subscribe((msg) => {
       if (msg?.content || msg?.imgURL) {
-        msg.isMine = msg.senderId === this.userId;
+        console.log("msg got: ", msg);
         this.messageArray.push(msg);
       }
     });
@@ -67,10 +66,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.subscription) this.subscription.unsubscribe();
     if (this.messageSubscription) this.messageSubscription.unsubscribe();
-  }
-
-  getIsPhoto() {
-    return this.isPhoto;
   }
 
   getState() {
@@ -96,7 +91,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
           content: null,
           isMine: true,
           imgURL: URL.createObjectURL(this.selectedFile),
-          isJSON: false,
           senderId: null
         })
         this.selectedFile = null;
@@ -111,7 +105,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
           content: msgText,
           isMine: true,
           imgURL: null,
-          isJSON: false,
           senderId: null
         })
         this.msgForm.reset();
@@ -121,7 +114,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   sendReport() {
-    //TODO: отправка жалоб
+    this.wsService.sendReport();
   }
 
   handleFileInput(event: Event) {

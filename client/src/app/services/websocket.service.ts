@@ -69,14 +69,20 @@ export class WebSocketService {
       try {
         const jsonData = JSON.parse(data);
         console.log("jsondata: ", jsonData);
-        return this.createMessage(jsonData.content, null, true, jsonData.senderId);
+        return this.createMessage(jsonData.content, null, jsonData.senderId);
       } catch (e) {
-        return this.createMessage(data, null, false, null);
+        return this.createMessage(data, null, null);
       }
     } else {
       const blob = new Blob([data], { type: 'image' });
       const url = URL.createObjectURL(blob);
-      return this.createMessage(null, url, false, null);
+      return this.createMessage(null, url, null);
+    }
+  }
+
+  public sendReport() {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ action: 'report' }));
     }
   }
 
@@ -84,12 +90,11 @@ export class WebSocketService {
     if (this.ws) this.ws.close();
   }
 
-  private createMessage(content: string | any, imgURL: string | null, isJSON: boolean, senderId: string | null) {
+  private createMessage(content: string | any, imgURL: string | null, senderId: string | null) {
     return {
       content,
       isMine: false,
       imgURL,
-      isJSON,
       senderId
     }
   }
