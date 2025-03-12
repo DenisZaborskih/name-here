@@ -71,7 +71,7 @@
       height: 554px;
       width: 600px;
     }
-    &_for-search{
+    &_for-search {
       justify-content: center;
       align-items: center;
     }
@@ -86,7 +86,7 @@
     gap: 24px;
     display: flex;
     flex-direction: column;
-    flex: 1;
+    margin-bottom: 100px;
   }
 
   &__message_my,
@@ -110,6 +110,21 @@
     color: red;
     text-align: left;
   }
+  &__message_contain-image{
+    display: flex;
+    &_my{
+      align-items: end;
+      justify-content: end;
+    }
+    &_my{
+      align-items: start;
+      justify-content: start;
+    }
+  }
+  &__chat-image {
+    max-height: 500px;
+    max-width: 500px;
+  }
 }
 
 .message-type {
@@ -117,6 +132,11 @@
   padding-right: 30px;
   background-color: rgba($color: #000000, $alpha: 0.6);
   border-radius: 20px;
+  &_for-image {
+    display: grid;
+    gap: 0;
+    grid-template-columns: 7fr 1fr 1fr;
+  }
   &__message-write {
     background: transparent;
     margin: 0;
@@ -143,6 +163,9 @@
       border-top-left-radius: 20px;
       border-bottom-left-radius: 20px;
       outline: none;
+    }
+    &_hidden {
+      display: none;
     }
   }
   &__image-button {
@@ -207,5 +230,24 @@
   margin: 0 2% 0 2%;
   &_disabled {
     display: none;
+  }
+}
+
+.image-preview {
+  display: flex;
+  width: 150px;
+  height: 84px;
+  padding: 5px 5px 5px 25px;
+  &__image {
+    min-width: 83px;
+    max-width: 100px;
+    height: 83px;
+  }
+  &__remove-button {
+    height: 30px;
+    width: 30px;
+    background-image: url("../../../../public/assets/exit\ 1.png");
+    background-color: lime;
+    background-size: contain;
   }
 }

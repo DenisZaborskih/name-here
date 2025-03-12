@@ -27,10 +27,10 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   public imagePreview: string | null = null;
   public MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 МБ
   public canAddFile = true;
+  public sendPhoto = false;
   
   private selectedFile: File | null = null;
   private state!: State;
-  private isPhoto: boolean = true;
   private subscription!: Subscription;
   private messageSubscription!: Subscription;
   private userId: string;
@@ -57,7 +57,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     });
     this.messageSubscription = this.wsService.message$.subscribe((msg) => {
       if (msg?.content || msg?.imgURL) {
-        msg.isMine = msg.senderId === this.userId;
+        console.log("msg got: ", msg);
         this.messageArray.push(msg);
       }
     });
@@ -66,10 +66,6 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.subscription) this.subscription.unsubscribe();
     if (this.messageSubscription) this.messageSubscription.unsubscribe();
-  }
-
-  getIsPhoto() {
-    return this.isPhoto;
   }
 
   getState() {
@@ -90,14 +86,27 @@ export class ChatPageComponent implements OnInit, OnDestroy {
 
   sendMessage() {
     if (this.selectedFile) {
-      if (this.wsService.sendFile(this.selectedFile, this.userId)) {
+      if (this.wsService.sendFile(this.selectedFile)) {
+        this.messageArray.push({
+          content: null,
+          isMine: true,
+          imgURL: URL.createObjectURL(this.selectedFile),
+          senderId: null
+        })
         this.selectedFile = null;
         this.imagePreview = null;
+        this.sendPhoto = false;
         this.log("Изображение отправлено");
       }
     } else if (this.msgForm.valid) {
       const msgText = this.msgForm.get('msg')?.value;
       if (this.wsService.sendMessage(msgText, this.userId)) {
+        this.messageArray.push({
+          content: msgText,
+          isMine: true,
+          imgURL: null,
+          senderId: null
+        })
         this.msgForm.reset();
         this.log("Текстовое сообщение отправлено");
       }
@@ -105,7 +114,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   sendReport() {
-    //TODO: отправка жалоб
+    this.wsService.sendReport();
   }
 
   handleFileInput(event: Event) {
@@ -115,6 +124,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       if (this.validateFile(file)) {
         this.selectedFile = file;
         this.imagePreview = URL.createObjectURL(file);
+        this.sendPhoto = true;
         this.log(`Файл выбран: ${file.name}`);
       } else {
         this.canAddFile = false;
@@ -129,6 +139,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   removeImage() {
     this.imagePreview = null;
     this.selectedFile = null;
+    this.sendPhoto = false;
     this.log("Изображение удалено");
   }
 
