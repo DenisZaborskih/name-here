@@ -27,6 +27,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   public imagePreview: string | null = null;
   public MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 МБ
   public canAddFile = true;
+  public sendPhoto = false;
   
   private selectedFile: File | null = null;
   private state!: State;
@@ -93,6 +94,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       if (this.wsService.sendFile(this.selectedFile, this.userId)) {
         this.selectedFile = null;
         this.imagePreview = null;
+        this.sendPhoto = false;
         this.log("Изображение отправлено");
       }
     } else if (this.msgForm.valid) {
@@ -115,6 +117,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       if (this.validateFile(file)) {
         this.selectedFile = file;
         this.imagePreview = URL.createObjectURL(file);
+        this.sendPhoto = true;
         this.log(`Файл выбран: ${file.name}`);
       } else {
         this.canAddFile = false;
@@ -129,6 +132,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   removeImage() {
     this.imagePreview = null;
     this.selectedFile = null;
+    this.sendPhoto = false;
     this.log("Изображение удалено");
   }
 

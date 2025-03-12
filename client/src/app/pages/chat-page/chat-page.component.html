@@ -53,9 +53,8 @@
                 *ngIf="msg.imgURL"
                 [src]="msg.imgURL"
                 alt="Chat Image"
-                class="chat-image"
+                class="chat-container__chat-image"
               />
-
             </p>
           </div>
           <div class="add-error bottom">
@@ -63,10 +62,15 @@
               class="add-photo-error"
               [class.add-photo-error_disabled]="canAddFile"
             >
-              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ {{MAX_IMAGE_SIZE / 1024 / 1024}} МБ <br>
+              ПРЕВЫШЕНИЕ РАЗМЕРА ФАЙЛА. МАКСИМУМ
+              {{ MAX_IMAGE_SIZE / 1024 / 1024 }} МБ <br />
               ВОЗМОЖНО НЕ ТОТ ТИП ФАЙЛА
             </p>
-            <div class="message-type" [formGroup]="msgForm">
+            <div
+              class="message-type"
+              [formGroup]="msgForm"
+              [class.message-type_for-image]="sendPhoto"
+            >
               <div class="image-preview" *ngIf="imagePreview">
                 <img
                   [src]="imagePreview"
@@ -76,15 +80,14 @@
                 <button
                   class="image-preview__remove-button"
                   (click)="removeImage()"
-                >
-                  х
-                </button>
+                ></button>
               </div>
               <textarea
                 formControlName="msg"
                 name="message-write"
                 id="message-write"
                 class="message-type__message-write"
+                [class.message-type__message-write_hidden]="sendPhoto"
                 placeholder="Начните печатать"
                 (keydown.enter)="onEnterPressed($event)"
               ></textarea>

@@ -110,6 +110,10 @@
     color: red;
     text-align: left;
   }
+  &__chat-image{
+    max-height: 500px;
+    max-width: 500px;
+  }
 }
 
 .message-type {
@@ -117,6 +121,11 @@
   padding-right: 30px;
   background-color: rgba($color: #000000, $alpha: 0.6);
   border-radius: 20px;
+  &_for-image{
+    display: grid;
+    grid-template-columns: 70% 15% 15%;
+    max-height: 150px;
+  }
   &__message-write {
     background: transparent;
     margin: 0;
@@ -143,6 +152,9 @@
       border-top-left-radius: 20px;
       border-bottom-left-radius: 20px;
       outline: none;
+    }
+    &_hidden{
+      display: none;
     }
   }
   &__image-button {
@@ -207,5 +219,22 @@
   margin: 0 2% 0 2%;
   &_disabled {
     display: none;
+  }
+}
+
+.image-preview{
+  display: flex;
+  width: 150px;
+  height: 100px;
+  &__image{
+    width: 95px;
+    height: 95px;
+  }
+  &__remove-button{
+    height: 30px;
+    width: 30px;
+    background-image: url("../../../../public/assets/exit\ 1.png");
+    background-color: lime;
+    background-size: contain;
   }
 }
