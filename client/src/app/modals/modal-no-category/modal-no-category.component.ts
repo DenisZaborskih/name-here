@@ -9,23 +9,14 @@ declare var bootstrap: any;
   templateUrl: './modal-no-category.component.html',
   styleUrl: './modal-no-category.component.scss'
 })
-export class ModalNoCategoryComponent implements AfterViewInit {
+export class ModalNoCategoryComponent {
   @Output() closed = new EventEmitter<void>();
   @ViewChild('modalElement', { static: true }) modalElement!: ElementRef;
 
   private modalInstance: any;
 
-  ngAfterViewInit() {
-    this.modalInstance = new (window as any).bootstrap.Modal(
-      this.modalElement.nativeElement,
-      { babackdrop: 'static' }
-    );
-    this.modalInstance.show();
-  }
-
   onClose() {
     this.closed.emit();
-    this.modalInstance.hide();
   }
 
   onOpen() {
