@@ -2,14 +2,18 @@
 import { Injectable } from '@angular/core';
 import { Message } from '../interfaces/message';
 import { BehaviorSubject } from 'rxjs';
+import { State } from '../enums/state';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private ws!: WebSocket;
   private messageSubject = new BehaviorSubject<Message | null>(null);
+  private state = new BehaviorSubject<State>(State.Search);
+
+  public state$ = this.state.asObservable();
   public message$ = this.messageSubject.asObservable();
 
   public initWebSocket(chatGroup: string) {
-    this.ws = new WebSocket(`ws://localhost/api/v1/chat/ws/${chatGroup}`);
+    this.ws = new WebSocket(`ws://192.168.155.66/api/v1/chat/ws/${chatGroup}`);
     this.ws.onopen = () => {
       console.log(`WebSocket init success`);
     }
@@ -68,6 +72,7 @@ export class WebSocketService {
     if (typeof data === 'string') {
       try {
         const jsonData = JSON.parse(data);
+        this.setState(jsonData.status);
         console.log("jsondata: ", jsonData);
         return this.createMessage(jsonData.content, null, jsonData.senderId);
       } catch (e) {
@@ -96,6 +101,31 @@ export class WebSocketService {
       isMine: false,
       imgURL,
       senderId
+    }
+  }
+
+  setState(status: number) {
+    switch (status) {
+      case 1012: {
+        this.state.next(State.Banned);
+        break;
+      }
+      case 1014: {
+        this.state.next(State.Search);
+        break;
+      }
+      case 1101: {
+        this.state.next(State.Active);
+        break;
+      }
+      case 1102: {
+        this.state.next(State.Search);
+        break;
+      }
+      case 1103: {
+        this.state.next(State.Search);
+        break;
+      }
     }
   }
 

@@ -6,12 +6,8 @@ import { interval, Subscription } from 'rxjs';
 import { WebSocketService } from '../../services/websocket.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Message } from '../../interfaces/message';
-
-enum State {
-  Active,
-  Search,
-  Banned
-}
+import { State } from '../../enums/state';
+import { BanService } from '../../services/ban.service';
 
 @Component({
   selector: 'app-chat-page',
@@ -28,16 +24,18 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   public MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 МБ
   public canAddFile = true;
   public sendPhoto = false;
-  
+
   private selectedFile: File | null = null;
   private state!: State;
   private subscription!: Subscription;
   private messageSubscription!: Subscription;
+  private stateSubscription!: Subscription;
   private userId: string;
 
   constructor(
     private chatGroupService: ChatGroupService,
     private wsService: WebSocketService,
+    private banService: BanService,
     private fb: FormBuilder,
   ) {
     this.msgForm = this.fb.group({
@@ -61,11 +59,19 @@ export class ChatPageComponent implements OnInit, OnDestroy {
         this.messageArray.push(msg);
       }
     });
+    this.stateSubscription = this.wsService.state$.subscribe((curState) => {
+      this.state = curState;
+      if (this.state === State.Banned){
+        this.banService.ban();
+      }
+    });
   }
 
   ngOnDestroy() {
     if (this.subscription) this.subscription.unsubscribe();
     if (this.messageSubscription) this.messageSubscription.unsubscribe();
+    if (this.stateSubscription) this.stateSubscription.unsubscribe();
+    this.wsService.closeWebSocket();
   }
 
   getState() {
@@ -129,7 +135,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       } else {
         this.canAddFile = false;
         this.log(`Ошибка выбора файла: недопустимый формат или размер`);
-        setTimeout(() =>{
+        setTimeout(() => {
           this.canAddFile = true;
         }, 5000);
       }
