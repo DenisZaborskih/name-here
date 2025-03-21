@@ -7,9 +7,9 @@ import { State } from '../enums/state';
 export class WebSocketService {
   private ws!: WebSocket;
   private messageSubject = new BehaviorSubject<Message | null>(null);
-  private state = new BehaviorSubject<State>(State.Search);
+  private status = new BehaviorSubject<number>(1102);
 
-  public state$ = this.state.asObservable();
+  public status$ = this.status.asObservable();
   public message$ = this.messageSubject.asObservable();
 
   public initWebSocket(chatGroup: string) {
@@ -105,28 +105,7 @@ export class WebSocketService {
   }
 
   setState(status: number) {
-    switch (status) {
-      case 1012: {
-        this.state.next(State.Banned);
-        break;
-      }
-      case 1014: {
-        this.state.next(State.Search);
-        break;
-      }
-      case 1101: {
-        this.state.next(State.Active);
-        break;
-      }
-      case 1102: {
-        this.state.next(State.Search);
-        break;
-      }
-      case 1103: {
-        this.state.next(State.Search);
-        break;
-      }
-    }
+    this.status.next(status);
   }
 
   public generateUserId() {

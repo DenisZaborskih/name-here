@@ -18,13 +18,12 @@
       >
         ОТПРАВИТЬ ЖАЛОБУ
       </button>
-      <button class="chat-navigation__button" (click)="setState(State.Search)">
+      <button class="chat-navigation__button" (click)="toSearch(State.Search)">
         ВЕРНУТЬСЯ К ПОИСКУ
       </button>
       <button
         class="chat-navigation__button"
-        [routerLink]="['/start']"
-        routerLinkActive="router-link-active"
+        (click)="closeConnection()"
       >
         ПОКИНУТЬ ЧАТ
       </button>
