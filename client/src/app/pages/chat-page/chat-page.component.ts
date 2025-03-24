@@ -1,22 +1,18 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { RouterLink, RouterModule } from '@angular/router';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
 import { interval, Subscription } from 'rxjs';
 import { WebSocketService } from '../../services/websocket.service';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Message } from '../../interfaces/message';
-
-enum State {
-  Active,
-  Search,
-  Banned
-}
+import { State } from '../../enums/state';
+import { BanService } from '../../services/ban.service';
 
 @Component({
   selector: 'app-chat-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
@@ -28,16 +24,21 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   public MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 МБ
   public canAddFile = true;
   public sendPhoto = false;
-  
+
+  private router : Router = inject(Router);
+  private searchFlag = true;
+  private chatGroup!: string;
   private selectedFile: File | null = null;
   private state!: State;
   private subscription!: Subscription;
   private messageSubscription!: Subscription;
+  private stateSubscription!: Subscription;
   private userId: string;
 
   constructor(
     private chatGroupService: ChatGroupService,
     private wsService: WebSocketService,
+    private banService: BanService,
     private fb: FormBuilder,
   ) {
     this.msgForm = this.fb.group({
@@ -52,28 +53,61 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       if (chatGroup) {
         this.log(chatGroup);
         this.state = State.Search;
-        this.wsService.initWebSocket(chatGroup);
+        this.chatGroup = chatGroup;
       }
     });
     this.messageSubscription = this.wsService.message$.subscribe((msg) => {
+      console.log("msg got: ", msg);
       if (msg?.content || msg?.imgURL) {
-        console.log("msg got: ", msg);
         this.messageArray.push(msg);
+      }
+    });
+    this.stateSubscription = this.wsService.status$.subscribe((curState) => {
+      console.log('Status changed: ', curState);
+      if (curState === 1012){
+        this.state = State.Banned;
+        this.banService.ban();
+      }
+      else if(curState === 1102 && this.searchFlag){
+        this.state = State.Search;
+        this.clearMessages();
+        this.wsService.closeWebSocket();
+        this.wsService.initWebSocket(this.chatGroup);
+        this.searchFlag = false;
+      }
+      else if(curState === 1103 || curState === 1104){
+        this.state = State.Search;
+        this.wsService.closeWebSocket();
+        this.clearMessages();
+        this.wsService.initWebSocket(this.chatGroup);
+        this.searchFlag = true;
+      }
+      else if(curState === 1101){
+        this.clearMessages();
+        this.state = State.Active;
+        this.searchFlag = false;
       }
     });
   }
 
   ngOnDestroy() {
+    this.wsService.setState(1104);
     if (this.subscription) this.subscription.unsubscribe();
     if (this.messageSubscription) this.messageSubscription.unsubscribe();
+    if (this.stateSubscription) this.stateSubscription.unsubscribe();
+    this.wsService.closeWebSocket();
+    this.clearMessages();
   }
 
   getState() {
     return this.state;
   }
 
-  setState(current: State) {
+  toSearch(current: State) {
     this.state = current;
+    this.searchFlag = true;
+    this.wsService.closeWebSocket();
+    this.wsService.initWebSocket(this.chatGroup);
   }
 
   onEnterPressed(event: Event) {
@@ -84,6 +118,11 @@ export class ChatPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  closeConnection(){
+    this.wsService.closeWebSocket();
+    this.router.navigate(['/start']);
+  }
+
   sendMessage() {
     if (this.selectedFile) {
       if (this.wsService.sendFile(this.selectedFile)) {
@@ -92,7 +131,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
           isMine: true,
           imgURL: URL.createObjectURL(this.selectedFile),
           senderId: null
-        })
+        });
         this.selectedFile = null;
         this.imagePreview = null;
         this.sendPhoto = false;
@@ -129,7 +168,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
       } else {
         this.canAddFile = false;
         this.log(`Ошибка выбора файла: недопустимый формат или размер`);
-        setTimeout(() =>{
+        setTimeout(() => {
           this.canAddFile = true;
         }, 5000);
       }
@@ -146,6 +185,10 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   private validateFile(file: File): boolean {
     const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
     return file.size <= this.MAX_IMAGE_SIZE && allowedTypes.includes(file.type);
+  }
+
+  private clearMessages(){
+    this.messageArray = [];
   }
 
   private log(message: string) {

@@ -2,14 +2,18 @@
 import { Injectable } from '@angular/core';
 import { Message } from '../interfaces/message';
 import { BehaviorSubject } from 'rxjs';
+import { State } from '../enums/state';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private ws!: WebSocket;
   private messageSubject = new BehaviorSubject<Message | null>(null);
+  private status = new BehaviorSubject<number>(1102);
+
+  public status$ = this.status.asObservable();
   public message$ = this.messageSubject.asObservable();
 
   public initWebSocket(chatGroup: string) {
-    this.ws = new WebSocket(`ws://localhost/api/v1/chat/ws/${chatGroup}`);
+    this.ws = new WebSocket(`ws://192.168.155.66/api/v1/chat/ws/${chatGroup}`);
     this.ws.onopen = () => {
       console.log(`WebSocket init success`);
     }
@@ -68,6 +72,7 @@ export class WebSocketService {
     if (typeof data === 'string') {
       try {
         const jsonData = JSON.parse(data);
+        this.setState(jsonData.status);
         console.log("jsondata: ", jsonData);
         return this.createMessage(jsonData.content, null, jsonData.senderId);
       } catch (e) {
@@ -97,6 +102,10 @@ export class WebSocketService {
       imgURL,
       senderId
     }
+  }
+
+  setState(status: number) {
+    this.status.next(status);
   }
 
   public generateUserId() {
