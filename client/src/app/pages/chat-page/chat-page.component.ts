@@ -91,6 +91,7 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.wsService.setState(1104);
     if (this.subscription) this.subscription.unsubscribe();
     if (this.messageSubscription) this.messageSubscription.unsubscribe();
     if (this.stateSubscription) this.stateSubscription.unsubscribe();
@@ -118,8 +119,8 @@ export class ChatPageComponent implements OnInit, OnDestroy {
   }
 
   closeConnection(){
-    this.router.navigate(['/start']);
     this.wsService.closeWebSocket();
+    this.router.navigate(['/start']);
   }
 
   sendMessage() {
