@@ -1,31 +1,39 @@
-<main class="main-container">
-  <div class="start-container">
-    <div class="container-header">
-      <img
-        src="assets/logo.svg"
-        alt="Тут Название Лого"
-        class="container-header__logo"
-      />
-      <h2 class="container-header__name">
-        <span class="container-header__name_red">ТУТ</span>
-        <span class="container-header__name_green">НАЗВАНИЕ</span>
-      </h2>
-    </div>
-    <div class="start-container__categories-area">
+<body [class.body_banned]="isBanned">
+  <main class="main-container" [class.main-container_banned]="isBanned">
+    <div class="ban-text" [class.ban-text_left]="isBanned" [hidden]="!isBanned">НА ВАС СЛИШКОМ МНОГО ЖАЛОБ</div>
+    <div class="start-container" [class.start-container_banned]="isBanned">
+      <div class="container-header">
+        <img
+          src="{{ source }}"
+          alt="Тут Название Лого"
+          class="container-header__logo"
+          [class.container-header__logo_banned]="isBanned"
+        />
+        <h2 class="container-header__name">
+          <span class="container-header__name_red">ТУТ</span>
+          <span class="container-header__name_green">НАЗВАНИЕ</span>
+        </h2>
+      </div>
+      <div class="start-container__categories-area">
+        <button
+          class="start-container__category"
+          (click)="toggleCategory(category)"
+          [class.active]="isSelected(category)"
+          *ngFor="let category of categories"
+        >
+          {{ category.toUpperCase() }}
+        </button>
+      </div>
       <button
-        class="start-container__category"
-        (click)="toggleCategory(category)"
-        [class.active]="isSelected(category)"
-        *ngFor="let category of categories"
-        >{{ category.toUpperCase() }}</button
+        class="start-container__button"
+        (click)="goToChat()"
+        [class.start-container__button_banned]="isBanned"
+        [disabled]="isBanned"
       >
+        {{ searchString }}
+      </button>
     </div>
-    <button
-      class="start-container__button"
-      (click)="goToChat()"
-    >
-      НАЧАТЬ ПОИСК
-    </button>
-  </div>
-</main>
-<ng-template #modalContainer></ng-template>>
+    <div class="ban-text" [hidden]="!isBanned">НАРУШЕНИЕ ПРАВИЛ САЙТА КАРАЕТСЯ СМЕРТНОЙ КАЗНЬЮ В ЛЮБОЙ СТРАНЕ ДОСТУПНОЙ НАМ ДЛЯ ПУТЕШЕСТВИЯ</div>
+  </main>
+  <ng-template #modalContainer></ng-template>>
+</body>
