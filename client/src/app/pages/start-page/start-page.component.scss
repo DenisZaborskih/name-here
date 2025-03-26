@@ -1,9 +1,16 @@
+.body_banned {
+  background-image: url("../../../../public/assets/ban-tile.png");
+}
+
 .main-container {
   display: flex;
   background-image: url("../../../../public/assets/bg-tile.png");
   margin: 0 30px 20px;
   justify-content: center;
   text-shadow: rgba($color: #000000, $alpha: 0.2) 0 4px 4px;
+  &_banned {
+    background-image: url("../../../../public/assets/bugs.png");
+  }
 }
 
 .start-container {
@@ -13,12 +20,19 @@
   background-image: url("../../../../public/assets/rug1\ 1.png");
   background-size: cover;
   align-items: center;
+  &_banned {
+    background-image: url("../../../../public/assets/ban-rug.png");
+  }
   &__button {
     font-size: 32px;
     color: #1e00ff;
     background-color: rgba($color: #000000, $alpha: 0.6);
     width: 80%;
     cursor: pointer;
+    &_banned {
+      color: red;
+      cursor: not-allowed;
+    }
   }
   &__categories-area {
     display: flex;
@@ -63,6 +77,9 @@
   gap: 50px;
   &__logo {
     height: 96px;
+    &_banned {
+      src: url("../../../../public/assets/ban-logo.png");
+    }
   }
   &__name {
     margin: 0;
@@ -85,5 +102,15 @@
       line-height: 1;
       font-size: 32px;
     }
+  }
+}
+
+.ban-text {
+  color: red;
+  width: 30%;
+  text-align: center;
+  margin: 16px 32px 32px 32px;
+  &_left{
+    font-size: 72px;
   }
 }

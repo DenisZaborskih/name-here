@@ -2,7 +2,6 @@
 import { Injectable } from '@angular/core';
 import { Message } from '../interfaces/message';
 import { BehaviorSubject } from 'rxjs';
-import { State } from '../enums/state';
 @Injectable({ providedIn: 'root' })
 export class WebSocketService {
   private ws!: WebSocket;
@@ -13,20 +12,18 @@ export class WebSocketService {
   public message$ = this.messageSubject.asObservable();
 
   public initWebSocket(chatGroup: string) {
-    this.ws = new WebSocket(`ws://192.168.155.66/api/v1/chat/ws/${chatGroup}`);
+    this.ws = new WebSocket(`ws://192.168.51.66/api/v1/chat/ws/${chatGroup}`);
     this.ws.onopen = () => {
       console.log(`WebSocket init success`);
     }
 
     this.ws.onmessage = (event) => {
       try {
-        console.log(event);
         const msg = this.recieveMessage(event.data);
-        console.log('message handled:', msg?.content);
         this.messageSubject.next(msg ? msg : null);
       }
       catch (error) {
-        console.log("Error handling message: ", error);
+        console.error("Error handling message: ", error);
       }
     }
 
@@ -43,10 +40,8 @@ export class WebSocketService {
         content: msg
       };
       this.ws.send(JSON.stringify(messageWithSender));
-      console.log(`[WebSocketService] Сообщение отправлено: ${msg}`);
       return true;
     } else {
-      console.error("[WebSocketService] Ошибка отправки сообщения: WebSocket не открыт");
       return false;
     }
   }
@@ -73,7 +68,6 @@ export class WebSocketService {
       try {
         const jsonData = JSON.parse(data);
         this.setState(jsonData.status);
-        console.log("jsondata: ", jsonData);
         return this.createMessage(jsonData.content, null, jsonData.senderId);
       } catch (e) {
         return this.createMessage(data, null, null);

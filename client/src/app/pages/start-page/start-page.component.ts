@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, inject, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ChatGroupService } from '../../services/chat-group.service';
 import { ModalNoCategoryComponent } from '../../modals/modal-no-category/modal-no-category.component';
+import { CookieService } from 'ngx-cookie-service';
+import { BanService } from '../../services/ban.service';
 @Component({
   selector: 'app-start-page',
   standalone: true,
@@ -10,10 +12,14 @@ import { ModalNoCategoryComponent } from '../../modals/modal-no-category/modal-n
   templateUrl: './start-page.component.html',
   styleUrl: './start-page.component.scss'
 })
-export class StartPageComponent {
-  @ViewChild('modalContainer', {read: ViewContainerRef, static: true})
+export class StartPageComponent implements OnInit {
+  @ViewChild('modalContainer', { read: ViewContainerRef, static: true })
   container!: ViewContainerRef;
+  public isBanned!: boolean;
+  public source!: string;
+  public searchString!: string;
 
+  private cookieService: CookieService = inject(CookieService);
   private router: Router = inject(Router);
   private selectedCategory: string | null = null;
 
@@ -35,8 +41,22 @@ export class StartPageComponent {
     "Египет"
   ];
 
-  constructor(private chatGroupService: ChatGroupService
+  constructor(
+    private chatGroupService: ChatGroupService,
+    private banService: BanService
   ) { }
+
+  ngOnInit() {
+    this.isBanned = this.banService.checkBan();
+    if (this.isBanned) {
+      this.source = "assets/ban-logo.png";
+      this.searchString = "ПОИСК ЗАПРЕЩЁН"
+    }
+    else {
+      this.source = "assets/logo.svg"
+      this.searchString = "НАЧАТЬ ПОИСК"
+    }
+  }
 
   toggleCategory(category: string) {
     this.selectedCategory = this.selectedCategory === category ? null : category;
@@ -47,11 +67,12 @@ export class StartPageComponent {
   }
 
   goToChat() {
+    if (this.isBanned) return;
     if (this.selectedCategory === null) {
       this.container.clear();
       const componentRef = this.container.createComponent(ModalNoCategoryComponent);
 
-      componentRef.instance.closed.subscribe(()=>{
+      componentRef.instance.closed.subscribe(() => {
         this.container.clear();
       });
     }
